@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 2;
+use Test::More tests => 3;
 # use lib '../lib/';
 # use Test::mysqld;
 use DateTime;
@@ -60,4 +60,33 @@ subtest 'like_search' => sub{
     is($got->name, $expect);
 
     model->delete('todos', {name => $expect});
+};
+
+subtest 'search_deadline_from_to' => sub{
+    my $now = DateTime->now(time_zone => 'local');
+    my $from  = $now->clone->add(days => 1);
+    my $someday = $now->clone->add(days => 2);
+    my $to = $now->clone->add(days => 3);
+    my $expect1 = model->insert('todos', {
+            name => 'deadline_from_to',
+            deadline => $someday
+        });
+    #BETWEENでfromとtoの中間の日付の行を取得する
+    my $itr = model->search('todos', +{deadline => +{between => [$from, $to]}});
+    my $got = $itr->next;
+    is($got->id, $expect1->id);
+
+    my $query = 'like';
+    my $expect2 = model->insert('todos', {
+            name => 'deadline_from_to and like',
+            deadline => $someday
+        });
+    #BETWEEN+LIKE検索
+    $itr = model->search_named(
+          q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to},
+            {query => "%".$query."%", from=>$from, to=>$to});
+    $got = $itr->next;
+    is($got->id, $expect2->id);
+
+    model->delete('todos', +{deadline => +{between => [$from, $to]}});
 };
