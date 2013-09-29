@@ -146,34 +146,15 @@ my $get_todos = sub {
     # TODO パラメータのvalidator
 
     my $limit = 10; # 1ページの表示上限
-
-    my $todo_itr;
-    if ($from || $to) {
-        unless ($from) {
-          $from = "0000-01-01";
-          # デフォルト値（こんなに小さくなくてもいい？）
-        }
-        unless ($to) {
-          $to = "9999-12-31";
-          # デフォルト値（こんなに大きくなくてもいい？）
-        }
-        $todo_itr = $self->model->search_named(
-            q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
-              {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
-        );
-    } else {
-        $todo_itr = $self->model->search_named(
-            q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline DESC LIMIT :offset, :limit}, 
-            {query => "%".$q."%", limit => $limit, offset=> $p*$limit}
-        );
-    }
-
-# LIKEをorで連ねると上手くいかない... 
-#    my $todo_itr = $self->model->search_named(
-#      q{SELECT * FROM todos WHERE name LIKE :query1 or comment LIKE :query2 AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
-#      {query1 => $pattern, query2=>$pattern,  from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
-#    );
-
+    my $todo_itr = ($from and $to) ?
+      $self->model->search_named(
+        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
+        {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
+      ) : $self->model->search_named(
+        q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline DESC LIMIT :offset, :limit}, 
+        {query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit}
+      );
+    
     my $rows = $todo_itr->all;
     my @data = map {
       id   => $_->id+0,     name => $_->name, 
