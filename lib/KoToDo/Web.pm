@@ -21,6 +21,18 @@ sub model {
     $self->{__model}
 }
 
+# 日付文字列
+# %Y-%m-%d => PerlのDateTimeに!!
+sub convert_datetime {
+  my ($self, $str) = @_;
+  
+  my $strp = DateTime::Format::Strptime->new(
+    pattern   => '%Y-%m-%d',  
+    time_zone => 'Asia/Tokyo', 
+  );
+
+}
+
 # flashミドルウェア
 filter 'flash' => sub {
     my $app = shift;
@@ -72,11 +84,11 @@ get '/todos/:id/edit' => [qw/flash/] => sub {
 post '/todos/:id/update' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
-    my $content = $c->req->param('content');
+    my $name = $c->req->param('name');
     $self->model->update('todos', {
-        content => $content,
+      name => $name,
     }, {
-        id => $id,
+      id => $id,
     });
     $c->redirect('/todos/')
 };
@@ -93,10 +105,10 @@ get '/todos/:id/delete' => [qw/flash/] => sub {
 # 作成
 post '/todos/' => [qw/flash/] => sub {
     my ($self, $c) = @_;
-    my $content = $c->req->param('content');
+    my $name = $c->req->param('name');
     # TODO: 保存成功か確認
     $self->model->insert('todos', {
-        content => $content,
+        name => $name,
         created_at => DateTime->now(time_zone => 'local'),
     });
     $self->{flash} = {
@@ -126,10 +138,14 @@ my $get_todos = sub {
     # from: deadlineでの開始日付
     # to: deadline検索でのおわり日付
     my $q = $c->req->param("q") || "";
-    my $p = $c->req->param("p") || 0;
-    my $from = $c->req->param("from");
-    my $to = $c->req->param("to");
+    my $p = $c->req->param("p") || 1;
+    my $from  = $c->req->param("from");
+    my $to    = $c->req->param("to");
 
+    unless ($from) {
+      $from = "0000-01-01";
+      # デフォルト値（こんなに小さくなくてもいい？）
+    }
     unless ($to) {
       $to = "9999-12-31";
       # デフォルト値（こんなに大きくなくてもいい？）
@@ -141,7 +157,7 @@ my $get_todos = sub {
 
     my $todo_itr = $self->model->search_named(
       q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
-      {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
+      {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
     );
 # LIKEをorで連ねると上手くいかない... 
 #    my $todo_itr = $self->model->search_named(
@@ -188,12 +204,7 @@ my $update_todo = sub {
     my $comment = $c->req->param('comment');
     my $deadline_str = $c->req->param('deadline');
 
-    my $strp = DateTime::Format::Strptime->new(
-      pattern   => '%Y-%m-%d',  
-      time_zone => 'Asia/Tokyo', 
-    );
-  
-    my $deadline = $strp->parse_datetime($deadline_str);
+    my $deadline = $self->convert_datetime($deadline_str);
 
     $self->model->update('todos', {
       name => $name,
@@ -221,9 +232,16 @@ get "/$API/todos/:id.json/delete" => $delete_todo;
 my $create_todo = sub {
     my ($self, $c) = @_;
     my $name = $c->req->param('name');
+    my $comment = $c->req->param('comment');
+    my $deadline_str = $c->req->param('deadline');
+
+    my $deadline = $self->convert_datetime($deadline_str);
+
     # TODO: 保存成功か確認
     $self->model->insert('todos', {
         name => $name,
+        comment => $comment, 
+        deadline => $deadline,
         created_at => DateTime->now(time_zone => 'local'),
     });
     $self->{flash} = {
