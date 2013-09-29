@@ -209,7 +209,10 @@
     model: app
   })).render();
 
-  Backbone.history.start();
+  Backbone.history.start({
+    pushState: true,
+    root: "/app/"
+  });
 
 }).call(this);
 ;
