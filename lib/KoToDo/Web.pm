@@ -7,6 +7,7 @@ use Kossy;
 use KoToDo::Model;
 use DateTime;
 use Data::Dumper;
+use DateTime::Format::Strptime;
 
 sub model {
     my $self = shift;
@@ -115,7 +116,25 @@ my $API = "api";
 # 一覧ページ
 my $get_todos = sub {
     my ($self, $c) = @_;
-    my $todo_itr = $self->model->search('todos', {});
+    
+    # q: 検索キーワード
+    # p: ページ番号 1~
+    # from: deadlineでの開始日付
+    # to: deadline検索でのおわり日付
+    my $q = $c->req->param("q");
+    my $p = $c->req->param("p");
+    my $from = $c->req->param("from");
+    my $to = $c->req->param("to"); 
+
+    # TODO パラメータのvalidator
+
+    my $limit = 10; # ページの上限
+
+    my $todo_itr = $self->model->search_named(
+      q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
+      {query => "%".$q."%", from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
+    );
+
     my $rows = $todo_itr->all;
     my @data = map {
       id   => $_->id+0,     name => $_->name, 
