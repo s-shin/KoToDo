@@ -1,6 +1,6 @@
 
 class Todo extends Backbone.Model
-	urlRoot: "/todos/"
+	urlRoot: "/api/todos/"
 	defaults:
 		id: null
 		name: null
@@ -13,7 +13,7 @@ class Todo extends Backbone.Model
 
 class TodoList extends Backbone.Collection
 	model: Todo
-	url: "/todos/"
+	url: "/api/todos/"
 	parse: (response) ->
 		console.log response
 		console.error response.error if response.error

@@ -62,7 +62,7 @@
       return _ref1;
     }
 
-    Todo.prototype.urlRoot = "/todos/";
+    Todo.prototype.urlRoot = "/api/todos/";
 
     Todo.prototype.defaults = {
       id: null,
@@ -88,7 +88,7 @@
 
     TodoList.prototype.model = Todo;
 
-    TodoList.prototype.url = "/todos/";
+    TodoList.prototype.url = "/api/todos/";
 
     TodoList.prototype.parse = function(response) {
       console.log(response);
