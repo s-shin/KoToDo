@@ -12,14 +12,13 @@
 
     <nav class="navbar navbar-default">
 			<div class="container">
-        <div class="col-md-8 col-md-offset-2">
-
-	      <div class="navbar-header">
+				<div class="navbar-header">
 	        <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
-	      </div>
-        <div class="navbar-header pull-right">
-          <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">Done tasks</a>
-        </div>
+				</div>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#">Done tasks</a></li>
+					<li><a href="#">Create new task</a></li>
+				</ul>
       </div>
 			</div>
 		</nav>

@@ -1,5 +1,5 @@
 (function() {
-  var App, AppView, MainView, Router, Todo, TodoList, TodoView, app, router, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
+  var App, AppView, MainView, Router, Todo, TodoForm, TodoList, TodoView, app, router, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -181,12 +181,24 @@
 
   })(Backbone.View);
 
+  TodoForm = (function(_super) {
+    __extends(TodoForm, _super);
+
+    function TodoForm() {
+      _ref6 = TodoForm.__super__.constructor.apply(this, arguments);
+      return _ref6;
+    }
+
+    return TodoForm;
+
+  })(Backbone.View);
+
   Router = (function(_super) {
     __extends(Router, _super);
 
     function Router() {
-      _ref6 = Router.__super__.constructor.apply(this, arguments);
-      return _ref6;
+      _ref7 = Router.__super__.constructor.apply(this, arguments);
+      return _ref7;
     }
 
     Router.prototype.routes = {
