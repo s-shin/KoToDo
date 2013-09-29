@@ -1,5 +1,5 @@
 
-class ToDo extends Backbone.Model
+class Todo extends Backbone.Model
 	urlRoot: "/todos/"
 	defaults:
 		id: null
@@ -11,10 +11,11 @@ class ToDo extends Backbone.Model
 		created_at: null
 
 
-class ToDoList extends Backbone.Collection
-	model: ToDo
-	url: /todos/
+class TodoList extends Backbone.Collection
+	model: Todo
+	url: "/todos/"
 	parse: (response) ->
+		console.log response
 		console.error response.error if response.error
-		response.todo # TODO: サーバー側に合わせる
+		response.todos # TODO: サーバー側に合わせる
 

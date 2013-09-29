@@ -1,94 +1,32 @@
 (function() {
-  var App, AppView, DoneView, FormView, MainView, ToDo, ToDoForm, ToDoList, ToDoView, app, loading, router, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+  var App, AppView, MainView, Router, Todo, TodoList, TodoView, app, router, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  loading = new ((function() {
-    function _Class() {}
-
-    _Class.prototype.show = function() {};
-
-    _Class.prototype.hide = function(timeout) {
-      if (timeout == null) {
-        timeout = 1000;
-      }
-    };
-
-    return _Class;
-
-  })());
-
-  app = null;
-
-  router = null;
-
-  ToDoForm = (function(_super) {
-    __extends(ToDoForm, _super);
-
-    function ToDoForm() {
-      _ref = ToDoForm.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ToDoForm;
-
-  })(Backbone.Model);
-
-  AppView = (function(_super) {
-    __extends(AppView, _super);
-
-    function AppView() {
-      _ref1 = AppView.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    return AppView;
-
-  })(Backbone.View);
-
-  DoneView = (function(_super) {
-    __extends(DoneView, _super);
-
-    function DoneView() {
-      _ref2 = DoneView.__super__.constructor.apply(this, arguments);
-      return _ref2;
-    }
-
-    return DoneView;
-
-  })(Backbone.View);
-
-  MainView = (function(_super) {
-    __extends(MainView, _super);
-
-    function MainView() {
-      _ref3 = MainView.__super__.constructor.apply(this, arguments);
-      return _ref3;
-    }
-
-    return MainView;
-
-  })(Backbone.View);
-
-  FormView = (function(_super) {
-    __extends(FormView, _super);
-
-    function FormView() {
-      _ref4 = FormView.__super__.constructor.apply(this, arguments);
-      return _ref4;
-    }
-
-    return FormView;
-
-  })(Backbone.View);
-
   App = (function(_super) {
+    var loading;
+
     __extends(App, _super);
 
     function App() {
-      _ref5 = App.__super__.constructor.apply(this, arguments);
-      return _ref5;
+      _ref = App.__super__.constructor.apply(this, arguments);
+      return _ref;
     }
+
+    loading = new ((function() {
+      function _Class() {}
+
+      _Class.prototype.show = function() {};
+
+      _Class.prototype.hide = function(timeout) {
+        if (timeout == null) {
+          timeout = 1000;
+        }
+      };
+
+      return _Class;
+
+    })());
 
     App.prototype.defaults = {
       loadingCount: 0
@@ -116,17 +54,17 @@
 
   })(Backbone.Model);
 
-  ToDo = (function(_super) {
-    __extends(ToDo, _super);
+  Todo = (function(_super) {
+    __extends(Todo, _super);
 
-    function ToDo() {
-      _ref6 = ToDo.__super__.constructor.apply(this, arguments);
-      return _ref6;
+    function Todo() {
+      _ref1 = Todo.__super__.constructor.apply(this, arguments);
+      return _ref1;
     }
 
-    ToDo.prototype.urlRoot = "/todos/";
+    Todo.prototype.urlRoot = "/todos/";
 
-    ToDo.prototype.defaults = {
+    Todo.prototype.defaults = {
       id: null,
       name: null,
       is_done: null,
@@ -136,49 +74,141 @@
       created_at: null
     };
 
-    return ToDo;
+    return Todo;
 
   })(Backbone.Model);
 
-  ToDoList = (function(_super) {
-    __extends(ToDoList, _super);
+  TodoList = (function(_super) {
+    __extends(TodoList, _super);
 
-    function ToDoList() {
-      _ref7 = ToDoList.__super__.constructor.apply(this, arguments);
-      return _ref7;
+    function TodoList() {
+      _ref2 = TodoList.__super__.constructor.apply(this, arguments);
+      return _ref2;
     }
 
-    ToDoList.prototype.model = ToDo;
+    TodoList.prototype.model = Todo;
 
-    ToDoList.prototype.url = /todos/;
+    TodoList.prototype.url = "/todos/";
 
-    ToDoList.prototype.parse = function(response) {
+    TodoList.prototype.parse = function(response) {
+      console.log(response);
       if (response.error) {
         console.error(response.error);
       }
-      return response.todo;
+      return response.todos;
     };
 
-    return ToDoList;
+    return TodoList;
 
   })(Backbone.Collection);
 
-  ToDoView = (function(_super) {
-    __extends(ToDoView, _super);
+  AppView = (function(_super) {
+    __extends(AppView, _super);
 
-    function ToDoView() {
-      _ref8 = ToDoView.__super__.constructor.apply(this, arguments);
-      return _ref8;
+    function AppView() {
+      _ref3 = AppView.__super__.constructor.apply(this, arguments);
+      return _ref3;
     }
 
-    ToDoView.prototype.initialize = function() {};
+    AppView.prototype.initialize = function() {};
 
-    ToDoView.prototype.render = function() {};
+    AppView.prototype.render = function() {};
 
-    ToDoView.prototype.events = function() {};
-
-    return ToDoView;
+    return AppView;
 
   })(Backbone.View);
+
+  MainView = (function(_super) {
+    __extends(MainView, _super);
+
+    function MainView() {
+      _ref4 = MainView.__super__.constructor.apply(this, arguments);
+      return _ref4;
+    }
+
+    MainView.prototype.initialize = function() {
+      this.template = _.template("<ul></ul>");
+      this.$el.html(this.template());
+      this.elTodoList = this.$el.find("ul");
+      this.todos = new TodoList();
+      this.todos.fetch();
+      this.listenTo(this.todos, "add", this.addOneTodo);
+      return this.listenTo(this.todos, "reset", this.resetTodoList);
+    };
+
+    MainView.prototype.addOneTodo = function(todo) {
+      var view;
+      view = new TodoView({
+        model: todo
+      });
+      return this.elTodoList.append(view.render().el);
+    };
+
+    MainView.prototype.resetTodoList = function() {
+      this.elTodoList.empty();
+      return this.todos.each(this.addOneTodo, this);
+    };
+
+    MainView.prototype.render = function() {
+      this.resetTodoList();
+      return this;
+    };
+
+    return MainView;
+
+  })(Backbone.View);
+
+  TodoView = (function(_super) {
+    __extends(TodoView, _super);
+
+    function TodoView() {
+      _ref5 = TodoView.__super__.constructor.apply(this, arguments);
+      return _ref5;
+    }
+
+    TodoView.prototype.tagName = "li";
+
+    TodoView.prototype.initialize = function() {
+      return this.template = _.template("ID: <%= id %><br />\nName: <%= name %><br />\nComment: <%= comment %><br />\nDeadline: <%= deadline %><br />\nDone: <%= is_done %><br />\nCreated At: <%= created_at %><br />\nUpdated At: <%= updated_at %><br />");
+    };
+
+    TodoView.prototype.render = function() {
+      this.$el.html(this.template(this.model.toJSON()));
+      return this;
+    };
+
+    return TodoView;
+
+  })(Backbone.View);
+
+  Router = (function(_super) {
+    __extends(Router, _super);
+
+    function Router() {
+      _ref6 = Router.__super__.constructor.apply(this, arguments);
+      return _ref6;
+    }
+
+    Router.prototype.routes = {
+      "": "main"
+    };
+
+    Router.prototype.main = function() {
+      return $("#content").html((new MainView).render().el);
+    };
+
+    return Router;
+
+  })(Backbone.Router);
+
+  app = new App;
+
+  router = new Router;
+
+  (new AppView({
+    model: app
+  })).render();
+
+  Backbone.history.start();
 
 }).call(this);

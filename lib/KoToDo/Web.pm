@@ -45,7 +45,7 @@ get '/' => [qw/flash/] => sub {
 #----------------------------------------
 
 # 一覧ページ
-get '/todos.json' => [qw/flash/] => sub {
+my $get_todos = sub {
     my ($self, $c) = @_;
     my $todo_itr = $self->model->search('todos', {});
     my $rows = $todo_itr->all;
@@ -58,9 +58,11 @@ get '/todos.json' => [qw/flash/] => sub {
     } , @{$rows};
     $c->render_json(+{todos=>\@data});
 };
+get '/todos/' => $get_todos;
+get '/todos.json' => [qw/flash/] => $get_todos;
 
 # 個別ページ
-get '/todos/:id.json' => [qw/flash/] => sub {
+my $get_todo = sub {
   my ($self, $c) = @_;
   my $todo = $self->model->single('todos', {id => $c->args->{id}});
   $c->render_json(+{ 
@@ -74,6 +76,8 @@ get '/todos/:id.json' => [qw/flash/] => sub {
     } 
   });
 };
+get '/todos/:id' => $get_todo;
+get '/todos/:id.json' => [qw/flash/] => $get_todo;
 
 # 更新ページ
 get '/todos/:id.json/edit' => [qw/flash/] => sub {
@@ -98,15 +102,17 @@ post '/todos/:id.json/update' => [qw/flash/] => sub {
 };
 
 # 削除処理
-get '/todos/:id.json/delete' => [qw/flash/] => sub {
+my $delete_todo = sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
     $self->model->delete('todos', {id => $id});
     $c->render_json({status => 1});
 };
+router 'DELETE' => "/todos/:id" => $delete_todo;
+get '/todos/:id.json/delete' => [qw/flash/] => $delete_todo;
 
 # 作成
-post '/todos/new' => [qw/flash/] => sub {
+my $create_todo = sub {
     my ($self, $c) = @_;
     my $name = $c->req->param('name');
     # TODO: 保存成功か確認
@@ -119,6 +125,8 @@ post '/todos/new' => [qw/flash/] => sub {
     };
     $c->render_json({status => 1});
 };
+post '/todos/' => $create_todo;
+post '/todos/new' => [qw/flash/] => $create_todo;
 
 1;
 

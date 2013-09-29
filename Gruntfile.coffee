@@ -45,12 +45,11 @@ module.exports = (grunt) ->
 					"public/js/lib/kotodo.js": do ->
 						DIR = "src/client/kotodo/"
 						files = [
-							"index.coffee"
 							"model/*.coffee"
 							"view/*.coffee"
+							"index.coffee"
 						]
 						files[i] = DIR + files[i] for i in [0...files.length]
-						console.log files
 						files
 			client:
 				files: [{
