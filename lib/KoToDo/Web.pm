@@ -44,8 +44,8 @@ get '/todos.json' => [qw/flash/] => sub {
     my $todo_itr = $self->model->search('todos', {});
     my $rows = $todo_itr->all;
     my @data = map {
-      id   => $_->id,     name => $_->name, 
-      is_done => $_->is_done, deadline => $_->deadline, 
+      id   => $_->id+0,     name => $_->name, 
+      is_done => $_->is_done+0, deadline => $_->deadline, 
       comment =>  $_->comment, 
       updated_at => $_->updated_at, 
       created_at => $_->created_at 
@@ -59,8 +59,8 @@ get '/todos/:id.json' => [qw/flash/] => sub {
   my $todo = $self->model->single('todos', {id => $c->args->{id}});
   $c->render_json(+{ 
     todo => +{
-      id => $todo->id, name => $todo->name, 
-      is_done => $todo->is_done, 
+      id => $todo->id+0, name => $todo->name, 
+      is_done => $todo->is_done+0, 
       deadline => $todo->deadline, 
       comment => $todo->comment, 
       updated_at => $todo->updated_at, 
@@ -70,37 +70,37 @@ get '/todos/:id.json' => [qw/flash/] => sub {
 };
 
 # 更新ページ
-get '/todos/:id/edit' => [qw/flash/] => sub {
+get '/todos/:id.json/edit' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
+    # TODO 失敗した時の例外処理
     my $todo = $self->model->single('todos', {id => $c->args->{id}});
-    $c->render('todos/edit.tx', {todo => $todo});
+    $c->render_json( { status=>1 } );
 };
 
 # 更新処理
-post '/todos/:id/update' => [qw/flash/] => sub {
+post '/todos/:id.json/update' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
     my $name = $c->req->param('name');
     $self->model->update('todos', {
-        name => $name,
+      name => $name,
     }, {
-        id => $id,
+      id => $id,
     });
-    $c->redirect('/todos/')
+    $c->render_json( { status=>1 } )
 };
 
 # 削除処理
-get '/todos/:id/delete' => [qw/flash/] => sub {
+get '/todos/:id.json/delete' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
     $self->model->delete('todos', {id => $id});
-    # TODO: 削除処理
-    $c->redirect('/todos/');
+    $c->render_json({status => 1});
 };
 
 # 作成
-post '/todos/' => [qw/flash/] => sub {
+post '/todos/new' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $name = $c->req->param('name');
     # TODO: 保存成功か確認
@@ -111,7 +111,7 @@ post '/todos/' => [qw/flash/] => sub {
     $self->{flash} = {
         result => 'Save successful.',
     };
-    $c->redirect('/todos/');
+    $c->render_json({status => 1});
 };
 
 1;
