@@ -6,6 +6,7 @@ use utf8;
 use Kossy;
 use KoToDo::Model;
 use DateTime;
+use Data::Dumper;
 
 sub model {
     my $self = shift;
@@ -38,17 +39,34 @@ get '/' => [qw/flash/] => sub {
 };
 
 # 一覧ページ
-get '/todos/' => [qw/flash/] => sub {
+get '/todos.json' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $todo_itr = $self->model->search('todos', {});
-    $c->render('todos/index.tx', {todo_itr => $todo_itr});
+    my $rows = $todo_itr->all;
+    my @data = map {
+      id   => $_->id,     name => $_->name, 
+      is_done => $_->is_done, deadline => $_->deadline, 
+      comment =>  $_->comment, 
+      updated_at => $_->updated_at, 
+      created_at => $_->created_at 
+    } , @{$rows};
+    $c->render_json(+{todos=>\@data});
 };
 
 # 個別ページ
-get '/todos/:id' => [qw/flash/] => sub {
-    my ($self, $c) = @_;
-    my $todo = $self->model->single('todos', {id => $c->args->{id}});
-    $c->render('todos/show.tx', {todo => $todo});
+get '/todos/:id.json' => [qw/flash/] => sub {
+  my ($self, $c) = @_;
+  my $todo = $self->model->single('todos', {id => $c->args->{id}});
+  $c->render_json(+{ 
+    todo => +{
+      id => $todo->id, name => $todo->name, 
+      is_done => $todo->is_done, 
+      deadline => $todo->deadline, 
+      comment => $todo->comment, 
+      updated_at => $todo->updated_at, 
+      created_at => $todo->created_at
+    } 
+  });
 };
 
 # 更新ページ
