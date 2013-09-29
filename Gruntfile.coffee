@@ -38,11 +38,27 @@ module.exports = (grunt) ->
 				}]
 		
 		coffee:
+			client_joined:
+				options:
+					join: true
+				files: 
+					"public/js/lib/kotodo.js": do ->
+						DIR = "src/client/kotodo/"
+						files = [
+							"index.coffee"
+							"model/*.coffee"
+							"view/*.coffee"
+						]
+						files[i] = DIR + files[i] for i in [0...files.length]
+						console.log files
+						files
 			client:
 				files: [{
 					expand: true
 					cwd: "src/client"
-					src: ["*.coffee"]
+					src: [
+						"*.coffee"
+					]
 					dest: "public/js/lib"
 					ext: ".js"
 				}]
@@ -85,7 +101,7 @@ module.exports = (grunt) ->
 		watch:
 			client:
 				files: ["src/client/**/*.coffee"]
-				tasks: ["coffee:client", "concat:app_js"]
+				tasks: ["coffee", "concat:app_js"]
 			sass:
 				files: ["src/sass/**/*.scss"]
 				tasks: ["compass:dev", "concat:app_css"]

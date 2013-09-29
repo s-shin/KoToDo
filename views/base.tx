@@ -11,12 +11,14 @@
   <body>
 
     <nav class="navbar navbar-default">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
-      </div>
+			<div class="container">
+	      <div class="navbar-header">
+	        <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
+	      </div>
+			</div>
 		</nav>
     
-    <div class="container">
+    <div class="container" id="content">
       : block content -> {}
     </div>
 
