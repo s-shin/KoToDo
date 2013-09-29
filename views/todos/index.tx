@@ -11,7 +11,7 @@
   <li>
 		: my $todo_url = $todos_url + $todo.id;
 		[<a href="<: $todo_url :>"><: $todo.id :></a>]
-		<: $todo.content :> (<: $todo.created_at :>)
+		<: $todo.name :> (<: $todo.created_at :>)
 		- <a href="<: $todo_url :>/edit">edit</a>
 		- <a href="<: $todo_url :>/delete">delete</a>
 	</li>
