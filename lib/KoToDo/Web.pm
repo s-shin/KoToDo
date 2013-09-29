@@ -113,6 +113,7 @@ post '/todos/' => [qw/flash/] => sub {
 
 my $API = "api";
 
+# 返り値JSON
 my $success = {status => 1};
 my $failure = {status => 0};
 
@@ -184,8 +185,20 @@ my $update_todo = sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
     my $name = $c->req->param('name');
+    my $comment = $c->req->param('comment');
+    my $deadline_str = $c->req->param('deadline');
+
+    my $strp = DateTime::Format::Strptime->new(
+      pattern   => '%Y-%m-%d',  
+      time_zone => 'Asia/Tokyo', 
+    );
+  
+    my $deadline = $strp->parse_datetime($deadline_str);
+
     $self->model->update('todos', {
       name => $name,
+      comment => $comment, 
+      deadline => $deadline,   
     }, {
       id => $id,
     });
