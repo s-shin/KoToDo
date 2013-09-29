@@ -63,9 +63,9 @@ get '/todos/:id/edit' => [qw/flash/] => sub {
 post '/todos/:id/update' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
-    my $content = $c->req->param('content');
+    my $name = $c->req->param('name');
     $self->model->update('todos', {
-        content => $content,
+        name => $name,
     }, {
         id => $id,
     });
@@ -84,10 +84,10 @@ get '/todos/:id/delete' => [qw/flash/] => sub {
 # 作成
 post '/todos/' => [qw/flash/] => sub {
     my ($self, $c) = @_;
-    my $content = $c->req->param('content');
+    my $name = $c->req->param('name');
     # TODO: 保存成功か確認
     $self->model->insert('todos', {
-        content => $content,
+        name => $name,
         created_at => DateTime->now(time_zone => 'local'),
     });
     $self->{flash} = {
