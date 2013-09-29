@@ -12,4 +12,4 @@ class Router extends Backbone.Router
 app = new App
 router = new Router
 (new AppView({model: app})).render()
-Backbone.history.start()
+Backbone.history.start({pushState: true, root: "/app/"})

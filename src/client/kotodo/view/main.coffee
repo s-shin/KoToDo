@@ -1,8 +1,10 @@
 
+# 最初に表示されるメインのToDoリスト画面
+
 class MainView extends Backbone.View
 	initialize: ->
 		@template = _.template """
-		<ul></ul>
+		<ul class="panel-group" id="todo-accordion"></ul>
 		"""
 		@$el.html @template()
 		# todo list

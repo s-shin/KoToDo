@@ -118,13 +118,13 @@ my $get_todos = sub {
     my ($self, $c) = @_;
     
     # q: 検索キーワード
-    # p: ページ番号 1~
+    # p: ページ番号 0~
     # from: deadlineでの開始日付
     # to: deadline検索でのおわり日付
-    my $q = $c->req->param("q");
-    my $p = $c->req->param("p");
+    my $q = $c->req->param("q") || "";
+    my $p = $c->req->param("p") || 0;
     my $from = $c->req->param("from");
-    my $to = $c->req->param("to"); 
+    my $to = $c->req->param("to");
 
     unless ($to) {
       $to = "9999-12-31";

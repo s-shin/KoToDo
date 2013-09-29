@@ -1,5 +1,67 @@
 : cascade base
 : around content -> {
-	<p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
+<div class="col-md-8 col-md-offset-2">
+
+<div class="input">
+
+    <form action="post" role="form">
+        <div class="form-todo">
+            <input type="text" class="form-control" id="name" placeholder="Todo">
+        </div>
+        <div class="panel-group" id="accordion">
+          <div class="panel panel-default">
+             <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_form">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    Detail
+                </h4>
+            </div><!--panejl-heading-->
+        </a>
+
+        <div id="collapse_form" class="panel-collapse collapse">
+          <div class="panel-body">
+            <div class="form-group">
+                <label for="memo">Memo</label>
+                <input type="text" class="form-control" id="memo" placeholder="Memo">
+            </div><!--form-group-->
+            <div class="form-group">
+                <label for="deadline">Deadline</label>
+                <!--カレンダーのUIにする-->
+                <input type="datetime" class="form-control" id="deadline">
+            </div><!--form-group-->
+        </div><!--panel-body-->
+    </div><!--collapseOne-->
+</div><!--panel-default-->
+</div><!--panel-group-->
+<button type="submit" class="btn btn-default btn-primary btn-block">Submit</button>
+</form>
+
+</div>
+
+<div class="todo-list">
+
+<!--for todo in todos -->
+    <div class="panel-group" id="todo_accordion_1">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+            <input type="checkbox" name="todo_1" value="done" />
+            <a class="accordion-toggle" data-toggle="collapse" data-parent="#todo_accordion_1" href="#todo_collapse_1"> Send the mail
+                <span class="pull-right">Deadline: 2013/10/1</span>
+            </a>
+        </div><!--panejl-heading-->
+
+        <div id="todo_collapse_1" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>Memomemomemomemo</p>
+        </div><!--panel-body-->
+    </div><!--collapseOne-->
+</div><!--panel-default-->
+</div><!--panel-group-->
+
+<!--endfor-->
+
+</div><!--todo-list-->
+
+</div><!--col-->
 : }
 

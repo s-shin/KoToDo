@@ -3,4 +3,12 @@
 body {
 }
 
+ul.panel-group {
+  margin: 0;
+  padding: 0;
+}
 
+#todo-form {
+  display: none;
+	margin-bottom: 40px;
+}

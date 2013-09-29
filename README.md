@@ -14,9 +14,6 @@ Usage
 Development
 -----------
 
-### Requirements
-
-
 ### Setup
 
 	$ npm install
