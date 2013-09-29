@@ -34,16 +34,17 @@ subtest 'test_of_test' => sub{
 subtest 'like_search' => sub{
     my $query = 'search';
     #見つからない場合
-    # my $row = model->search_named(
-    #     q{SELECT * FROM todos WHERE name LIKE :query},
-    #         {query => "%" . $query . "%"}
-    # );
-    # my $got =  $row->next;
-    # note explain defined($got->name);
-    # ok(!defined($got->name));
+    my $row = model->search_named(
+        q{SELECT * FROM todos WHERE name LIKE :query},
+            {query => "%" . $query . "%"}
+    );
+    my $got = $row->all;
+    my $len = @$got;
+    #見つからないときにallで取得すると、空配列になる
+    is($len, 0);
 
     my $expect = "like search test";
-    my $row = model->insert('todos', {
+    $row = model->insert('todos', {
             name => $expect,
             created_at => DateTime->now(time_zone => 'local'),
         });
@@ -54,7 +55,7 @@ subtest 'like_search' => sub{
             {query => "%" . $query . "%"}
     );
 
-    my $got = $row->next;
+    $got = $row->next;
     note explain $got->name;
     is($got->name, $expect);
 
