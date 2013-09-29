@@ -1,5 +1,5 @@
 requires 'Kossy';
-requires 'DBD::myql';
+requires 'DBD::mysql';
 requires 'Teng', '0.20';
 requires 'DateTime::Format::MySQL';
 
