@@ -1,0 +1,11 @@
+{
+  "name": "kotodo",
+  "version": "0.0.1",
+  "dependencies": {
+    "bootstrap": "~3.0.0"
+  },
+  "devDependencies": {
+    "backbone": "~1.0.0",
+    "underscore": "~1.5.2"
+  }
+}

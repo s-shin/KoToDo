@@ -3,28 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <title>KoToDo</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="<: $c.req.uri_for('/favicon.ico') :>" type="image/vnd.microsoft.icon" />
-    <link rel="stylesheet" href="<: $c.req.uri_for('/css/bootstrap.min.css') :>" />
-    <style>
-body { padding-top: 60px; }
-    </style>
+    <link rel="stylesheet" href="<: $c.req.uri_for('/css/vendor.css') :>" />
+    <link rel="stylesheet" href="<: $c.req.uri_for('/css/app.css') :>" />
   </head>
   <body>
 
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
-        </div>
+    <nav class="navbar navbar-default">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
       </div>
-    </div>
+		</nav>
     
     <div class="container">
       : block content -> {}
     </div>
 
-    <script type="text/javascript" src="<: $c.req.uri_for('/js/jquery.min.js') :>"></script>
-    <script type="text/javascript" src="<: $c.req.uri_for('/js/bootstrap.min.js') :>"></script>
+		<script type="text/javascript" src="<: $c.req.uri_for('/js/vendor.js') :>"></script>
+    <script type="text/javascript" src="<: $c.req.uri_for('/js/app.js') :>"></script>
   </body>
 </html>
 
