@@ -13,12 +13,15 @@ my $create_table = shift;
 my $dbh = KoToDo::Model->connect_mysql(
     "kotodo", $ENV{MYSQL_USER}, $ENV{MYSQL_PASSWORD});
 
-# 1をいれよう
+# 実行時に1をいれよう
 if ($create_table) {
     $dbh->do(q{
         CREATE TABLE todos (
             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             name TEXT NOT NULL,
+            is_done BOOLEAN NOT NULL DEFAULT FALSE, 
+            deadline DATETIME, 
+            comment text, 
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             created_at TIMESTAMP NOT NULL
         )
