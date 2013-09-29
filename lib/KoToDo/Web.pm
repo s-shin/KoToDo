@@ -113,6 +113,9 @@ post '/todos/' => [qw/flash/] => sub {
 
 my $API = "api";
 
+my $success = {status => 1};
+my $failure = {status => 0};
+
 # 一覧ページ
 my $get_todos = sub {
     my ($self, $c) = @_;
@@ -136,7 +139,7 @@ my $get_todos = sub {
     my $limit = 10; # 1ページの表示上限
 
     my $todo_itr = $self->model->search_named(
-      q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
+      q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
       {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
     );
 # LIKEをorで連ねると上手くいかない... 
