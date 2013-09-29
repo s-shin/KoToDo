@@ -1,0 +1,9 @@
+: if $todo.id {
+<form method="post" action="<: $c.req.uri_for('/todos/') :><: $todo.id :>/update">
+: } else {
+<form method="post" action="<: $c.req.uri_for('/todos/') :>">
+: }
+  <textarea name="content"><: $todo.content :></textarea><br />
+  <input type="submit" value="Submit" class="btn">
+</form>
+

@@ -1,0 +1,21 @@
+: cascade base
+: around content -> {
+: include todos::_form;
+: if $c.stash.flash.result {
+<p><: $c.stash.flash.result :></p>
+: }
+<h2>Note List</h2>
+<ul>
+: my $todos_url = $c.req.uri_for('/todos/');
+: while $todo_itr.next -> $todo {
+  <li>
+		: my $todo_url = $todos_url + $todo.id;
+		[<a href="<: $todo_url :>"><: $todo.id :></a>]
+		<: $todo.content :> (<: $todo.created_at :>)
+		- <a href="<: $todo_url :>/edit">edit</a>
+		- <a href="<: $todo_url :>/delete">delete</a>
+	</li>
+: }
+</ul>
+: }
+

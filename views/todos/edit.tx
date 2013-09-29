@@ -1,0 +1,6 @@
+: cascade base
+: around content -> {
+	<h2>Edit ToDo <: $todo.id :></h2>
+	: include todos::_form;
+: }
+
