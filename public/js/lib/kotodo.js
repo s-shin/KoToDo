@@ -127,7 +127,7 @@
     }
 
     MainView.prototype.initialize = function() {
-      this.template = _.template("<ul></ul>");
+      this.template = _.template("<ul class=\"panel-group\" id=\"todo-accordion\"></ul>");
       this.$el.html(this.template());
       this.elTodoList = this.$el.find("ul");
       this.todos = new TodoList();
@@ -169,7 +169,8 @@
     TodoView.prototype.tagName = "li";
 
     TodoView.prototype.initialize = function() {
-      return this.template = _.template("ID: <%= id %><br />\nName: <%= name %><br />\nComment: <%= comment %><br />\nDeadline: <%= deadline %><br />\nDone: <%= is_done %><br />\nCreated At: <%= created_at %><br />\nUpdated At: <%= updated_at %><br />");
+      this.$el.addClass("panel panel-default");
+      return this.template = _.template("<div class=\"panel-heading\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\" /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		created at <%= created_at %>\n		<% if (deadline) { %>\n			, deadline is <%= deadline %>\n		<% } %>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>\n<!--\nID: <%= id %><br />\nName: <%= name %><br />\nComment: <%= comment %><br />\nDeadline: <%= deadline %><br />\nDone: <%= is_done %><br />\nCreated At: <%= created_at %><br />\nUpdated At: <%= updated_at %><br />\n-->");
     };
 
     TodoView.prototype.render = function() {
