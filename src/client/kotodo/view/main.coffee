@@ -1,4 +1,6 @@
 
+# 最初に表示されるメインのToDoリスト画面
+
 class MainView extends Backbone.View
 	initialize: ->
 		@template = _.template """

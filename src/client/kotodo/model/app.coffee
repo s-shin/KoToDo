@@ -3,6 +3,9 @@
 
 class App extends Backbone.Model
 	
+	initialize: ->
+	
+	### とりあえずロード進捗表示は後で実装
 	# セオリーに反するけれどとりあえずここにおいておく
 	loading = new class
 		constructor: ->
@@ -24,6 +27,7 @@ class App extends Backbone.Model
 		c = @get "loadingCount"
 		loading.hide() if c is 1
 		@set "loadingCount", c - 1
+	###
 
 
 

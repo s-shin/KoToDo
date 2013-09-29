@@ -5,6 +5,7 @@ ul.panel-group {
 }
 
 /* line 11, ../../../src/sass/style.scss */
-.todo-list {
-  margin-top: 40px;
+#todo-form {
+  display: none;
+  margin-bottom: 40px;
 }

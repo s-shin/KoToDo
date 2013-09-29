@@ -16,15 +16,18 @@
 	        <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
 				</div>
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="#">Done tasks</a></li>
-					<li><a href="#">Create new task</a></li>
+					<li><a id="show-done-tasks" href="javascript: void 0;">Done tasks</a></li>
+					<li><a id="create-new-task" href="javascript: void 0;">Create new task</a></li>
 				</ul>
       </div>
 			</div>
 		</nav>
     
-    <div class="container" id="content">
-      : block content -> {}
+    <div class="container">
+			<div id="todo-form"></div>
+			<div id="content">
+				: block content -> {}
+			</div>
     </div>
 
 		<script type="text/javascript" src="<: $c.req.uri_for('/js/vendor.js') :>"></script>

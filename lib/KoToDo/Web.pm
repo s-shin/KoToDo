@@ -118,23 +118,32 @@ my $get_todos = sub {
     my ($self, $c) = @_;
     
     # q: 検索キーワード
-    # p: ページ番号 1~
+    # p: ページ番号 0~
     # from: deadlineでの開始日付
     # to: deadline検索でのおわり日付
-    my $q = $c->req->param("q");
-    my $p = $c->req->param("p");
+    my $q = $c->req->param("q") || "";
+    my $p = $c->req->param("p") || 0;
     my $from = $c->req->param("from");
-    my $to = $c->req->param("to"); 
+    my $to = $c->req->param("to");
 
     # TODO パラメータのvalidator
 
     my $limit = 10; # ページの上限
-
-    my $todo_itr = $self->model->search_named(
-      q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
-      {query => "%".$q."%", from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
-    );
-
+    
+    my $todo_itr;
+    if ($from or $to) {
+        $todo_itr = $self->model->search_named(
+            q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
+            {query => "%".$q."%", from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
+        );
+    } else {
+        $todo_itr = $self->model->search_named(
+            q{SELECT * FROM todos WHERE name LIKE :query LIMIT :offset, :limit}, 
+            {query => "%".$q."%", limit => $limit, offset=> $p*$limit}
+        );
+    }
+    
+    
     my $rows = $todo_itr->all;
     my @data = map {
       id   => $_->id+0,     name => $_->name, 

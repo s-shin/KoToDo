@@ -1,9 +1,8 @@
 
 class TodoView extends Backbone.View
 	tagName: "li"
-	
+	className: "panel panel-default"
 	initialize: ->
-		@$el.addClass("panel panel-default")
 		@template = _.template """
 		<div class="panel-heading">
 			<div class="checkbox-inline">
