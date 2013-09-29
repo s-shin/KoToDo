@@ -3,7 +3,7 @@
 : } else {
 <form method="post" action="<: $c.req.uri_for('/todos/') :>">
 : }
-  <textarea name="content"><: $todo.content :></textarea><br />
+  <textarea name="name"><: $todo.name :></textarea><br />
   <input type="submit" value="Submit" class="btn">
 </form>
 
