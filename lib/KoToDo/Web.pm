@@ -9,6 +9,7 @@ use DateTime;
 use Data::Dumper;
 use DateTime::Format::Strptime;
 use JSON;
+use Try::Tiny;
 my $_JSON = JSON->new()->allow_blessed(1)->convert_blessed(1)->ascii(1);
 
 sub model {
@@ -33,7 +34,26 @@ sub convert_datetime {
     time_zone => 'Asia/Tokyo', 
   );
 
+  $strp->parse_datetime($str);
 }
+
+filter 'get_param' => sub {
+  my $app = shift;
+  sub {
+    my ($self, $c) = @_;
+
+    # name
+    $c->stash->{name}     = $c->req->param('name');  
+
+    # deadline "%Y-%m-%d"
+    $c->stash->{deadline} = $c->req->param('deadline');
+
+    # comment
+    $c->stash->{comment}  = $c->req->param('comment');
+
+    $app->($self, $c);
+  }
+};
 
 # flashミドルウェア
 filter 'flash' => sub {
@@ -135,16 +155,14 @@ my $get_todos = sub {
     my ($self, $c) = @_;
     
     # q: 検索キーワード
-    # p: ページ番号 0~
+    # p: ページ番号 1~
     # from: deadlineでの開始日付
     # to: deadline検索でのおわり日付
     my $q = $c->req->param("q") || "";
-    my $p = $c->req->param("p") || 0;
+    my $p = $c->req->param("p") || 1;
     my $from  = $c->req->param("from");
     my $to    = $c->req->param("to");
-    
-    # TODO パラメータのvalidator
-
+   
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
       $self->model->search_named(
@@ -171,17 +189,23 @@ get "/$API/todos.json" => $get_todos;
 # 個別ページ
 my $get_todo = sub {
   my ($self, $c) = @_;
-  my $todo = $self->model->single('todos', {id => $c->args->{id}});
-  $c->render_json(+{ 
-    todo => +{
-      id => $todo->id+0, name => $todo->name, 
-      is_done => $todo->is_done+0, 
-      deadline => $todo->deadline, 
-      comment => $todo->comment, 
-      updated_at => $todo->updated_at, 
-      created_at => $todo->created_at
-    } 
-  });
+  try {
+    my $todo = $self->model->single('todos', {id => $c->args->{id}});
+
+    $c->render_json(+{ 
+      todo => +{
+        id => $todo->id+0, name => $todo->name, 
+        is_done => $todo->is_done+0, 
+        deadline => $todo->deadline, 
+        comment => $todo->comment, 
+        updated_at => $todo->updated_at, 
+        created_at => $todo->created_at
+      } 
+    });
+  } catch {
+    my %response = (%{$failure}, (messages=>["Not Found detail page."]));
+    $c->render_json(\%response);
+  }
 };
 get "/$API/todos/:id" => $get_todo;
 get "/$API/todos/:id.json" => $get_todo;
@@ -195,15 +219,20 @@ my $update_todo = sub {
     my $deadline_str = $c->req->param('deadline');
 
     my $deadline = $self->convert_datetime($deadline_str);
-
-    $self->model->update('todos', {
-      name => $name,
-      comment => $comment, 
-      deadline => $deadline,   
-    }, {
-      id => $id,
-    });
-    $c->render_json( { status=>1 } )
+    try {
+      $self->model->update('todos', {
+        name => $name,
+        comment => $comment, 
+        deadline => $deadline,   
+      }, {
+        id => $id,
+      });
+    
+      $c->render_json( $success )
+    } catch {
+      my %response = (%{$failure}, (messages=>["DB update error."]));
+      $c->render_json(\%response)
+    }
 };
 router 'PUT' => "/$API/todos/:id" => $update_todo;
 post "/$API/todos/:id.json/update" => $update_todo;
@@ -212,8 +241,16 @@ post "/$API/todos/:id.json/update" => $update_todo;
 my $delete_todo = sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
-    $self->model->delete('todos', {id => $id});
-    $c->render_json({status => 1});
+
+    try {
+      my $retval = $self->model->delete('todos', {id => $id});  
+      print Dumper($retval), "\n";
+      print STDOUT "----";
+      $c->render_json( $success );
+    } catch {
+      my %response = (%{$failure}, (massages=>["DB delete error."]));
+      $c->render_json(\%response);
+    }
 };
 router 'DELETE' => "/$API/todos/:id" => $delete_todo;
 get "/$API/todos/:id.json/delete" => $delete_todo;
@@ -236,16 +273,21 @@ my $create_todo = sub {
     }
     
     # TODO: 保存成功か確認
-    $self->model->insert('todos', {
-        name => $name,
-        comment => $comment, 
-        deadline => $deadline,
-        created_at => DateTime->now(time_zone => 'local'),
-    });
-    $self->{flash} = {
-        result => 'Save successful.',
-    };
-    $c->render_json({status => 1});
+    try {
+      $self->model->insert('todos', {
+          name => $name,
+          comment => $comment, 
+          deadline => $deadline,
+          created_at => DateTime->now(time_zone => 'local'),
+      });
+      $self->{flash} = {
+          result => 'Save successful.',
+      };
+      $c->render_json($success);
+    } catch {
+      my %response = (%{$failure}, (messages => ["todo create error."]));
+      $c->render_json(\%response);
+    }
 };
 post "/$API/todos/" => $create_todo;
 post "/$API/todos/new" => $create_todo;
