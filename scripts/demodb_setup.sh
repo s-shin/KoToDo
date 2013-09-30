@@ -5,7 +5,7 @@
 user="root"
 password="root"
 
-dbname="kossy"
+dbname="kotodo"
 
 
 create=" CREATE TABLE todos (\
