@@ -100,17 +100,14 @@
 
     AppView.prototype.el = $("body");
 
-    AppView.prototype.initialize = function() {
-      console.log(this.model);
-      return console.log(this);
-    };
+    AppView.prototype.initialize = function() {};
 
     AppView.prototype.events = {
       "click #create-new-task": "renderTodoForm"
     };
 
     AppView.prototype.renderTodoForm = function() {
-      return $("#todo-form").show().html(new TodoForm().render().el);
+      return $("#todo-form").fadeIn(500).html(new TodoForm().render().el);
     };
 
     AppView.prototype.render = function() {
@@ -174,7 +171,7 @@
     TodoView.prototype.className = "panel panel-default";
 
     TodoView.prototype.initialize = function() {
-      return this.template = _.template("<div class=\"panel-heading\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\" /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		created at <%= created_at %>\n		<% if (deadline) { %>\n			, deadline is <%= deadline %>\n		<% } %>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>\n<!--\nID: <%= id %><br />\nName: <%= name %><br />\nComment: <%= comment %><br />\nDeadline: <%= deadline %><br />\nDone: <%= is_done %><br />\nCreated At: <%= created_at %><br />\nUpdated At: <%= updated_at %><br />\n-->");
+      return this.template = _.template("<div class=\"panel-heading\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\"<%= is_done ? \" checked='checked'\" : \"\" %> /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		created at <%= created_at %>\n		<% if (deadline) { %>\n			, deadline is <%= deadline %>\n		<% } %>\n		<a href=\"#\">edit</a>\n		<a href=\"#\">delete</a>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>\n<!--\nID: <%= id %><br />\nName: <%= name %><br />\nComment: <%= comment %><br />\nDeadline: <%= deadline %><br />\nDone: <%= is_done %><br />\nCreated At: <%= created_at %><br />\nUpdated At: <%= updated_at %><br />\n-->");
     };
 
     TodoView.prototype.render = function() {
@@ -195,8 +192,34 @@
     }
 
     TodoForm.prototype.initialize = function() {
-      this.template = _.template("<form action=\"post\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\">Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<input type=\"text class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<button type=\"submit\" class=\"btn btn-default btn-primary btn-block\">Submit</button>\n</form>");
+      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\">Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<input type=\"text\" class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<button type=\"submit\" class=\"btn btn-default btn-primary btn-block\">Submit</button>\n</form>");
       return this.model != null ? this.model : this.model = new Todo();
+    };
+
+    TodoForm.prototype.events = {
+      "submit form": "submitNewTodo"
+    };
+
+    TodoForm.prototype.submitNewTodo = function(data) {
+      var todo;
+      data = {};
+      this.$el.find("input[type=text]").each(function() {
+        var t;
+        t = $(this);
+        return data[t.attr("name")] = t.val();
+      });
+      todo = new Todo(data);
+      todo.save(null, {
+        success: function(model, response, options) {
+          return router.navigate("/", {
+            trigger: true
+          });
+        },
+        error: function(model, response, options) {
+          return console.log(arguments);
+        }
+      });
+      return false;
     };
 
     TodoForm.prototype.render = function() {
@@ -231,6 +254,8 @@
   app = new App;
 
   router = new Router;
+
+  Backbone.emulateJSON = true;
 
   (new AppView({
     model: app

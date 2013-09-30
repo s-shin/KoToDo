@@ -6,7 +6,7 @@ class TodoView extends Backbone.View
 		@template = _.template """
 		<div class="panel-heading">
 			<div class="checkbox-inline">
-				<input type="checkbox" /> 
+				<input type="checkbox"<%= is_done ? " checked='checked'" : "" %> /> 
 				<a class="accordion-toggle" data-parent="#todo-accordion" data-toggle="collapse" href="#todo_collapse_<%= id %>">
 					<%= name %>
 				</a>
@@ -16,6 +16,8 @@ class TodoView extends Backbone.View
 				<% if (deadline) { %>
 					, deadline is <%= deadline %>
 				<% } %>
+				<a href="#">edit</a>
+				<a href="#">delete</a>
 			</span>
 		</div>
 		<div id="todo_collapse_<%= id %>" class="panel-collapse collapse">

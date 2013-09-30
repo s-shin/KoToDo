@@ -2,7 +2,7 @@
 class TodoForm extends Backbone.View
 	initialize: ->
 		@template = _.template """
-		<form action="post" role="form">
+		<form method="post" action="/api/todos/" role="form">
 			<div class="form-todo">
 				<input type="text" class="form-control" name="name" placeholder="ToDo" value="<%= name %>" />
 			</div>
@@ -19,7 +19,7 @@ class TodoForm extends Backbone.View
 				<div class="panel-body">
 					<div class="form-group">
 						<lable for="comment">Comment</label>
-						<input type="text class="form-control" name="comment" placeholder="Comment" />
+						<input type="text" class="form-control" name="comment" placeholder="Comment" />
 					</div>
 					<div class="form-group">
 						<label for="form-deadline">Deadline</label>
@@ -31,7 +31,23 @@ class TodoForm extends Backbone.View
 		</form>
 		"""
 		@model ?= new Todo()
-		
+	
+	events:
+		"submit form": "submitNewTodo"
+	
+	submitNewTodo: (data) ->
+		data = {}
+		@$el.find("input[type=text]").each ->
+			t = $(this)
+			data[t.attr("name")] = t.val()
+		todo = new Todo(data)
+		todo.save null,
+			success: (model, response, options) ->
+				router.navigate "/", {trigger: true}
+			error: (model, response, options) ->
+				console.log arguments
+		false
+	
 	render: ->
 		@$el.html @template(@model.toJSON())
 		@

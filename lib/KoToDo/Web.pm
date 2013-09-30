@@ -8,6 +8,8 @@ use KoToDo::Model;
 use DateTime;
 use Data::Dumper;
 use DateTime::Format::Strptime;
+use JSON;
+my $_JSON = JSON->new()->allow_blessed(1)->convert_blessed(1)->ascii(1);
 
 sub model {
     my $self = shift;
@@ -53,7 +55,6 @@ get '/' => [qw/flash/] => sub {
     $c->render('index.tx', { greeting => "Hello", num => 1 });
 };
 
-
 #----------------------------------------
 # URL: /todos/
 #----------------------------------------
@@ -86,7 +87,7 @@ post '/todos/:id/update' => [qw/flash/] => sub {
     my $id = $c->args->{id};
     my $name = $c->req->param('name');
     $self->model->update('todos', {
-      name => $name,
+        name => $name,
     }, {
       id => $id,
     });
@@ -138,27 +139,35 @@ my $get_todos = sub {
     # from: deadlineでの開始日付
     # to: deadline検索でのおわり日付
     my $q = $c->req->param("q") || "";
-    my $p = $c->req->param("p") || 1;
+    my $p = $c->req->param("p") || 0;
     my $from  = $c->req->param("from");
     my $to    = $c->req->param("to");
-
-    unless ($from) {
-      $from = "0000-01-01";
-      # デフォルト値（こんなに小さくなくてもいい？）
-    }
-    unless ($to) {
-      $to = "9999-12-31";
-      # デフォルト値（こんなに大きくなくてもいい？）
-    }
-
+    
     # TODO パラメータのvalidator
 
     my $limit = 10; # 1ページの表示上限
 
-    my $todo_itr = $self->model->search_named(
-      q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
-      {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
-    );
+    my $todo_itr;
+    if ($from || $to) {
+        unless ($from) {
+          $from = "0000-01-01";
+          # デフォルト値（こんなに小さくなくてもいい？）
+        }
+        unless ($to) {
+          $to = "9999-12-31";
+          # デフォルト値（こんなに大きくなくてもいい？）
+        }
+        $todo_itr = $self->model->search_named(
+            q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
+              {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
+        );
+    } else {
+        $todo_itr = $self->model->search_named(
+            q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline DESC LIMIT :offset, :limit}, 
+            {query => "%".$q."%", limit => $limit, offset=> $p*$limit}
+        );
+    }
+
 # LIKEをorで連ねると上手くいかない... 
 #    my $todo_itr = $self->model->search_named(
 #      q{SELECT * FROM todos WHERE name LIKE :query1 or comment LIKE :query2 AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
@@ -234,9 +243,17 @@ my $create_todo = sub {
     my $name = $c->req->param('name');
     my $comment = $c->req->param('comment');
     my $deadline_str = $c->req->param('deadline');
-
     my $deadline = $self->convert_datetime($deadline_str);
 
+    # Backboneのサポート
+    my $data = $c->req->param('model');
+    if ($data) {
+        $data = $_JSON->decode($data);
+        $name = $data->{name};
+        $comment = $data->{comment};
+        $deadline = undef;
+    }
+    
     # TODO: 保存成功か確認
     $self->model->insert('todos', {
         name => $name,
