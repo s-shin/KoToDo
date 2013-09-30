@@ -188,13 +188,13 @@ my $get_todos = sub {
 
     # is_doneがnullの時は両方でてくる
     unless(defined($is_done)) {
-      $is_done = -1;
+      $is_done = 0;
     }
 
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
       $self->model->search_named(
-        q{SELECT * FROM todos WHERE is_done >= :done AND name LIKE :query AND DATE(IFNULL(deadline, :future)) BETWEEN :from AND :to ORDER BY ifnull(deadline, :future) LIMIT :offset, :limit}, 
+        q{SELECT * FROM todos WHERE is_done = :done AND name LIKE :query AND DATE(IFNULL(deadline, :future)) BETWEEN :from AND :to ORDER BY ifnull(deadline, :future) LIMIT :offset, :limit}, 
         {done=>$is_done, query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       ) : $self->model->search_named(
         q{SELECT * FROM todos WHERE is_done >= :done AND name LIKE :query ORDER BY ifnull(deadline,  :future) LIMIT :offset, :limit}, 
