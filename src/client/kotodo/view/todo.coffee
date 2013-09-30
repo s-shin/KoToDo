@@ -67,8 +67,12 @@ class TodoView extends Backbone.View
 	
 	toggleDone: ->
 		# TODO: サーバーの方にis_doneの変更を通知
-		console.log "TODO: "
-		@$el.slideUp(500)
+		@model.save {
+			is_done: if @model.get("is_done") == 0 then 1 else 0
+		}, {
+			success: (model, response) =>
+				@$el.slideUp(500)
+		}
 	
 	editTodo: (e) ->
 		@template = @formTemplate

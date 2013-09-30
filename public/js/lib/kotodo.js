@@ -127,11 +127,20 @@
     }
 
     MainView.prototype.initialize = function(opts) {
-      this.template = _.template("<ul class=\"panel-group\" id=\"todo-accordion\"></ul>");
+      this.template = _.template("<ul class=\"panel-group\" id=\"todo-accordion\"></ul>\n<ul class=\"pagination\"></ul>");
+      this.paginationTemplate = _.template("	<li><a href=\"/app/page/<%= (page - 1) %>\">&laquo;</a></li>\n	<!--<li class=\"active\"><a href=\"#\">1 <span class=\"sr-only\">(current)</span></a></li>-->\n	<li><a href=\"/app/page/<%= (+page + 1) %>\">&raquo;</a></li>\n</ul>");
       this.$el.html(this.template());
-      this.elTodoList = this.$el.find("ul");
+      this.$el.find("ul.pagination").html(this.paginationTemplate({
+        page: opts.page
+      }));
+      this.elTodoList = this.$el.find("ul#todo-accordion");
       this.todos = new TodoList();
-      this.todos.fetch();
+      this.todos.fetch({
+        data: {
+          is_done: opts.is_done ? 1 : 0,
+          p: opts.page
+        }
+      });
       this.listenTo(this.todos, "add", this.addOneTodo);
       return this.listenTo(this.todos, "reset", this.resetTodoList);
     };
@@ -185,8 +194,14 @@
     };
 
     TodoView.prototype.toggleDone = function() {
-      console.log("TODO: ");
-      return this.$el.slideUp(500);
+      var _this = this;
+      return this.model.save({
+        is_done: this.model.get("is_done") === 0 ? 1 : 0
+      }, {
+        success: function(model, response) {
+          return _this.$el.slideUp(500);
+        }
+      });
     };
 
     TodoView.prototype.editTodo = function(e) {
@@ -305,11 +320,22 @@
 
     Router.prototype.routes = {
       "": "main",
+      "page/:page": "page",
       "done": "done"
     };
 
     Router.prototype.main = function() {
-      return $("#content").html((new MainView).render().el);
+      return $("#content").html((new MainView({
+        is_done: false,
+        page: 1
+      })).render().el);
+    };
+
+    Router.prototype.page = function(page) {
+      return $("#content").html((new MainView({
+        is_done: false,
+        page: page
+      })).render().el);
     };
 
     Router.prototype.done = function() {

@@ -80,6 +80,15 @@ get '/' => [qw/flash/] => sub {
 };
 
 #----------------------------------------
+# URL: /app/*
+#----------------------------------------
+
+get '/app/*' => sub {
+    my ($self, $c) = @_;
+    $c->render('index.tx', { greeting => "Hello", num => 1 });
+};
+
+#----------------------------------------
 # URL: /todos/
 #----------------------------------------
 
@@ -146,7 +155,6 @@ post '/todos/' => [qw/flash/] => sub {
     $c->redirect('/todos/');
 };
 
-1;
 
 #----------------------------------------------
 # 以降API
@@ -157,13 +165,14 @@ my $API = "api";
 # Backboneのサポート
 sub get_backbone_params {
     my ($self, $data) = @_;
-    my ($name, $comment, $deadline, $deadline_str);
+    my ($name, $comment, $deadline, $deadline_str, $is_done);
     $data = $_JSON->decode($data);
     $name = $data->{name};
     $comment = $data->{comment};
     $deadline_str = $data->{deadline};
     $deadline = $deadline_str ? $self->convert_datetime($deadline_str) : undef;
-    ($name, $comment, $deadline);
+    $is_done = $data->{is_done};
+    ($name, $comment, $deadline, $is_done);
 }
 
 # 返り値JSON
@@ -197,7 +206,7 @@ my $get_todos = sub {
         q{SELECT * FROM todos WHERE is_done = :done AND name LIKE :query AND DATE(IFNULL(deadline, :future)) BETWEEN :from AND :to ORDER BY ifnull(deadline, :future) LIMIT :offset, :limit}, 
         {done=>$is_done, query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       ) : $self->model->search_named(
-        q{SELECT * FROM todos WHERE is_done >= :done AND name LIKE :query ORDER BY ifnull(deadline,  :future) LIMIT :offset, :limit}, 
+        q{SELECT * FROM todos WHERE is_done = :done AND name LIKE :query ORDER BY ifnull(deadline,  :future) LIMIT :offset, :limit}, 
         {done=>$is_done, query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       );
     
@@ -251,7 +260,7 @@ my $update_todo = sub {
 
     my $model = $c->req->param('model');
     if ($model) {
-        ($name, $comment, $deadline) = $self->get_backbone_params($model);
+        ($name, $comment, $deadline, $is_done) = $self->get_backbone_params($model);
     }
 
     try {
