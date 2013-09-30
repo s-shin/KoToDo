@@ -26,6 +26,7 @@ sub model {
 
 # 日付文字列
 # %Y-%m-%d => PerlのDateTimeに!!
+# パース失敗時はundefが返る
 sub convert_datetime {
   my ($self, $str) = @_;
   
@@ -106,8 +107,11 @@ post '/todos/:id/update' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
     my $name = $c->req->param('name');
+    my $comment = $c->req->param('comment');
+    
     $self->model->update('todos', {
-        name => $name,
+      name => $name,
+      comment => $comment, 
     }, {
       id => $id,
     });
@@ -127,6 +131,7 @@ get '/todos/:id/delete' => [qw/flash/] => sub {
 post '/todos/' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $name = $c->req->param('name');
+    
     # TODO: 保存成功か確認
     $self->model->insert('todos', {
         name => $name,
@@ -178,10 +183,10 @@ my $get_todos = sub {
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
       $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
+        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline LIMIT :offset, :limit}, 
         {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
       ) : $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline DESC LIMIT :offset, :limit}, 
+        q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline LIMIT :offset, :limit}, 
         {query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit}
       );
     
@@ -278,6 +283,7 @@ my $create_todo = sub {
     my $name = $c->req->param('name');
     my $comment = $c->req->param('comment');
     my $deadline_str = $c->req->param('deadline');
+    
     my $deadline = $self->convert_datetime($deadline_str);
 
     my $model = $c->req->param('model');
@@ -285,7 +291,6 @@ my $create_todo = sub {
         ($name, $comment, $deadline) = $self->get_backbone_params($model);
     }
     
-    # TODO: 保存成功か確認
     try {
       $self->model->insert('todos', {
           name => $name,
