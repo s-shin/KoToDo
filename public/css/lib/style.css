@@ -1,10 +1,15 @@
-/* line 6, ../../../src/sass/style.scss */
+@font-face {
+  font-family: "Glyphicons Halflings";
+  src: url("/img/glyphicons-halflings-regular.woff");
+}
+
+/* line 9, ../../../src/sass/style.scss */
 ul.panel-group {
   margin: 0;
   padding: 0;
 }
 
-/* line 11, ../../../src/sass/style.scss */
+/* line 14, ../../../src/sass/style.scss */
 nav.navbar.navbar-default {
   background-color: #1abc9c;
   border-width: 0px;
@@ -14,27 +19,44 @@ nav.navbar.navbar-default {
   -o-border-radius: 0px;
   border-radius: 0px;
 }
-/* line 17, ../../../src/sass/style.scss */
+/* line 20, ../../../src/sass/style.scss */
 nav.navbar.navbar-default a {
   color: rgba(255, 255, 255, 0.9);
 }
-/* line 20, ../../../src/sass/style.scss */
+/* line 23, ../../../src/sass/style.scss */
 nav.navbar.navbar-default a:hover {
   color: #16a085;
   color: white;
 }
-/* line 26, ../../../src/sass/style.scss */
+/* line 29, ../../../src/sass/style.scss */
 nav.navbar.navbar-default a#create-new-task {
   padding: 8px 15px;
   margin: 6px 0 5px;
   background-color: #16a085;
 }
 
-/* line 35, ../../../src/sass/style.scss */
+/* line 39, ../../../src/sass/style.scss */
+#todo-form > div {
+  margin-bottom: 20px;
+}
+/* line 42, ../../../src/sass/style.scss */
+#todo-form .panel-group {
+  margin: 10px 0;
+}
+/* line 46, ../../../src/sass/style.scss */
+#todo-form .panel-group .panel .panel-heading {
+  padding: 5px 10px;
+}
+/* line 48, ../../../src/sass/style.scss */
+#todo-form .panel-group .panel .panel-heading h4 {
+  font-size: 0.9em;
+}
+
+/* line 57, ../../../src/sass/style.scss */
 #content {
   margin-bottom: 20px;
 }
-/* line 39, ../../../src/sass/style.scss */
+/* line 61, ../../../src/sass/style.scss */
 #content #todo-accordion .panel {
   -webkit-border-radius: 0px;
   -moz-border-radius: 0px;
@@ -43,13 +65,16 @@ nav.navbar.navbar-default a#create-new-task {
   border-radius: 0px;
   margin: 0;
 }
-/* line 43, ../../../src/sass/style.scss */
+/* line 65, ../../../src/sass/style.scss */
 #content #todo-accordion .panel-heading {
   background-color: #DFE;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -ms-border-radius: 0px;
+  -o-border-radius: 0px;
+  border-radius: 0px;
 }
-
-/* line 49, ../../../src/sass/style.scss */
-#todo-form {
-  display: none;
-  margin-bottom: 20px;
+/* line 69, ../../../src/sass/style.scss */
+#content #todo-accordion .overdue {
+  background-color: #F99;
 }

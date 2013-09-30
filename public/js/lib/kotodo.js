@@ -127,7 +127,6 @@
     }
 
     MainView.prototype.initialize = function(opts) {
-      console.log(opts);
       this.template = _.template("<ul class=\"panel-group\" id=\"todo-accordion\"></ul>");
       this.$el.html(this.template());
       this.elTodoList = this.$el.find("ul");
@@ -172,7 +171,7 @@
     TodoView.prototype.className = "panel panel-default";
 
     TodoView.prototype.initialize = function() {
-      this.todoTemplate = _.template("<div class=\"panel-heading\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\"<%= is_done ? \" checked='checked'\" : \"\" %> /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		<% if (deadline) { %>\n			(deadline: <%= deadline %>)\n		<% } else { %>\n			(no deadline)\n		<% } %>\n		<a class=\"btn btn-xs btn-default edit\" href=\"javascript: void 0;\">edit</a>\n		<a class=\"btn btn-xs btn-default delete\" href=\"javascript: void 0;\">delete</a>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>");
+      this.todoTemplate = _.template("<div class=\"panel-heading <%\n		if (deadline && new Date(deadline) < new Date()) { %>overdue<% } %>\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\"<%= is_done ? \" checked='checked'\" : \"\" %> /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		<% if (deadline) { %>\n			(Deadline: <%= new Date(deadline).toLocaleDateString() %>)\n		<% } else { %>\n			(no deadline)\n		<% } %>\n		<a class=\"btn btn-xs btn-default edit\" href=\"javascript: void 0;\">edit</a>\n		<a class=\"btn btn-xs btn-default delete\" href=\"javascript: void 0;\">delete</a>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>");
       this.formTemplate = _.template("<form>\n	<div class=\"panel-heading\">\n		<div class=\"checkbox-inline\">\n			<input type=\"text\" name=\"name\" class=\"form-control\" value=\"<%= name %>\" />\n		</div>\n		<span class=\"pull-right\">\n			<input type=\"datetime\" class=\"form-control\" name=\"deadline\" value=\"<%= deadline %>\" placeholder=\"deadline\" />\n		</span>\n	</div>\n	<div class=\"panel-body\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<label>Comment:</label>\n				<textarea name=\"comment\" class=\"form-control\"><%= comment %></textarea>\n			</div>\n			<button type=\"submit\" class=\"btn btn-primary\">Update</button>\n			<button type=\"button\" class=\"btn btn-default cancel\">Cancel</button>\n		</div>\n	</div>\n</form>");
       return this.template = this.todoTemplate;
     };
@@ -250,7 +249,7 @@
     }
 
     TodoForm.prototype.initialize = function() {
-      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\">Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<textarea class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" name=\"deadline\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<button type=\"submit\" class=\"btn btn-default btn-primary btn-block\">Submit</button>\n</form>");
+      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"New ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\"><span class=\"glyphicon glyphicon-arrow-down\"></span> Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<textarea class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" name=\"deadline\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<div style=\"overflow: hidden;\">\n		<button type=\"submit\" class=\"btn btn-default btn-primary pull-right\">Submit</button>\n	</div>\n</form>");
       return this.model != null ? this.model : this.model = new Todo();
     };
 
@@ -273,9 +272,7 @@
       }, {
         success: function(model, response, options) {
           _this.$el.hide();
-          return router.navigate("/", {
-            trigger: true
-          });
+          return Backbone.history.loadUrl();
         },
         error: function(model, response, options) {
           return console.log(arguments);

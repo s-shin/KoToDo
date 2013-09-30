@@ -4,7 +4,8 @@ class TodoView extends Backbone.View
 	className: "panel panel-default"
 	initialize: ->
 		@todoTemplate = _.template """
-		<div class="panel-heading">
+		<div class="panel-heading <%
+				if (deadline && new Date(deadline) < new Date()) { %>overdue<% } %>">
 			<div class="checkbox-inline">
 				<input type="checkbox"<%= is_done ? " checked='checked'" : "" %> /> 
 				<a class="accordion-toggle" data-parent="#todo-accordion" data-toggle="collapse" href="#todo_collapse_<%= id %>">
@@ -13,7 +14,7 @@ class TodoView extends Backbone.View
 			</div>
 			<span class="pull-right">
 				<% if (deadline) { %>
-					(deadline: <%= deadline %>)
+					(Deadline: <%= new Date(deadline).toLocaleDateString() %>)
 				<% } else { %>
 					(no deadline)
 				<% } %>

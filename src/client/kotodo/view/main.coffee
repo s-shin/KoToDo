@@ -3,7 +3,6 @@
 
 class MainView extends Backbone.View
 	initialize: (opts) ->
-		console.log opts
 		@template = _.template """
 		<ul class="panel-group" id="todo-accordion"></ul>
 		"""

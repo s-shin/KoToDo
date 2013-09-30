@@ -4,13 +4,13 @@ class TodoForm extends Backbone.View
 		@template = _.template """
 		<form method="post" action="/api/todos/" role="form">
 			<div class="form-todo">
-				<input type="text" class="form-control" name="name" placeholder="ToDo" value="<%= name %>" />
+				<input type="text" class="form-control" name="name" placeholder="New ToDo" value="<%= name %>" />
 			</div>
 			<div class="panel-group">
 				<div class="panel panel-default">
 					<a class="accordion-toggle" data-toggle="collapse" href="#collapse-form">
 						<div class="panel-heading">
-							<h4 class="panel-title">Detail</h4>
+							<h4 class="panel-title"><span class="glyphicon glyphicon-arrow-down"></span> Detail</h4>
 						</div>
 					</a>
 				</div>
@@ -27,7 +27,9 @@ class TodoForm extends Backbone.View
 					</div>
 				</div>
 			</div>
-			<button type="submit" class="btn btn-default btn-primary btn-block">Submit</button>
+			<div style="overflow: hidden;">
+				<button type="submit" class="btn btn-default btn-primary pull-right">Submit</button>
+			</div>
 		</form>
 		"""
 		@model ?= new Todo()
@@ -47,7 +49,8 @@ class TodoForm extends Backbone.View
 		}, {
 			success: (model, response, options) =>
 				@$el.hide()
-				router.navigate "/", {trigger: true}
+				#router.navigate "/", {trigger: true}
+				Backbone.history.loadUrl()
 			error: (model, response, options) ->
 				console.log arguments
 		}

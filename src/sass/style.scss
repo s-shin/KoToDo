@@ -1,5 +1,8 @@
 @import 'compass/css3';
 
+// public内の特定のディレクトリしかKossyでは静的に読み取れない？
+@include font-face("Glyphicons Halflings", url("/img/glyphicons-halflings-regular.woff"));
+
 body {
 }
 
@@ -32,6 +35,25 @@ nav.navbar.navbar-default {
   
 }
 
+#todo-form {
+  > div {
+    margin-bottom: 20px;
+  }
+  .panel-group {
+    margin: 10px 0;
+    .panel {
+      
+      .panel-heading {
+        padding: 5px 10px;
+        h4 {
+          font-size: 0.9em;
+        }
+      }
+      
+    }
+  }
+}
+
 #content {
   margin-bottom: 20px;
   
@@ -42,11 +64,11 @@ nav.navbar.navbar-default {
     }
     .panel-heading {
       background-color: #DFE;
+      @include border-radius(0px);
+    }
+    .overdue {
+      background-color: #F99;
     }
   }
 }
 
-#todo-form {
-  display: none;
-	margin-bottom: 20px;
-}
