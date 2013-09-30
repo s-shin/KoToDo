@@ -1,20 +1,18 @@
 #!/bin/bash
 
-#kossyデータベースがないと動かない
-
 #mysqlのroot権限
 user="root"
 password="root"
 
 #kotodoのアカウント
-kotodo_user="kotodo@localhost"
+kotodo_user="kotodo"
 kotodo_pass="kotodo"
 
 dbname="kotodo"
 
 
 db="CREATE DATABASE kotodo;\
-GRANT ALL ON kotodo.* TO "$kotodo_user" IDENTIFIED BY '"$kotodo_pass"';"
+GRANT ALL ON kotodo.* TO "$kotodo_user"@localhost IDENTIFIED BY '"$kotodo_pass"';"
 
 
 create=" CREATE TABLE todos (\
@@ -28,20 +26,30 @@ created_at TIMESTAMP NOT NULL\
 );\
 "
 
+prefix="INSERT INTO todos(name, comment)"
+prefix_full="INSERT INTO todos(name, comment, deadline)"
+
 #Test data for demo
 insert="INSERT INTO todos(name, comment, deadline) \
-VALUES ('あしたっていつのあしたよ？', 'あしたって今さッ！', ADDDATE(NOW(), 1));\
+VALUES ('パーティの返事をする', '鹿鳴館', ADDDATE(NOW(), 1));\
 INSERT INTO todos(name, comment) \
-VALUES ('無期限タスク', 'コメント');
-
+VALUES ('年金の書類を提出する', '両親に確認を取る');\
+INSERT INTO todos(name, comment, deadline) \
+VALUES ('内定式', 'スピーチの練習をしておく', ADDDATE(NOW(), 1));\
+INSERT INTO todos(name, comment, deadline) \
+VALUES ('澄川さんへのメッセージを書く', 'ありがとうございました！', ADDDATE(NOW(), 0));\
+INSERT INTO todos(name, comment, deadline) \
+VALUES ('借りた本を返す', '', ADDDATE(NOW(), -1));\
+INSERT INTO todos(name, comment) \
+VALUES ('Perlマスターになる', 'Rubyiestを駆逐してやる');\
 "
 
 #create db
-echo $db|mysql --user=$user --password=$password $dbname
+echo $db|mysql --user=$user --password=$password
 #create table
-echo $create|mysql --user=$kotodo_user --password=$kotodo_password $dbname
+echo $create|mysql --user=$kotodo_user --password=$kotodo_pass $dbname
 #insert data
-echo $insert|mysql --user=$kotodo_user --password=$kotodo_password $dbname
+echo $insert|mysql --user=$kotodo_user --password=$kotodo_pass $dbname
 
 
 

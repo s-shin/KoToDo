@@ -19,11 +19,11 @@ class TodoForm extends Backbone.View
 				<div class="panel-body">
 					<div class="form-group">
 						<lable for="comment">Comment</label>
-						<input type="text" class="form-control" name="comment" placeholder="Comment" />
+						<textarea class="form-control" name="comment" placeholder="Comment" />
 					</div>
 					<div class="form-group">
 						<label for="form-deadline">Deadline</label>
-						<input type="datetime" class="form-control" id="form-deadline" />
+						<input type="datetime" name="deadline" class="form-control" id="form-deadline" />
 					</div>
 				</div>
 			</div>
@@ -40,12 +40,17 @@ class TodoForm extends Backbone.View
 		@$el.find("input[type=text]").each ->
 			t = $(this)
 			data[t.attr("name")] = t.val()
-		todo = new Todo(data)
-		todo.save null,
-			success: (model, response, options) ->
+		new Todo().save {
+			name: @$el.find("input[name=name]").val()
+			comment: @$el.find("textarea[name=comment]").val()
+			deadline: @$el.find("input[name=deadline]").val()
+		}, {
+			success: (model, response, options) =>
+				@$el.hide()
 				router.navigate "/", {trigger: true}
 			error: (model, response, options) ->
 				console.log arguments
+		}
 		false
 	
 	render: ->

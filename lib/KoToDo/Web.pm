@@ -153,6 +153,18 @@ post '/todos/' => [qw/flash/] => sub {
 
 my $API = "api";
 
+# Backboneのサポート
+sub get_backbone_params {
+    my ($self, $data) = @_;
+    my ($name, $comment, $deadline, $deadline_str);
+    $data = $_JSON->decode($data);
+    $name = $data->{name};
+    $comment = $data->{comment};
+    $deadline_str = $data->{deadline};
+    $deadline = $deadline_str ? $self->convert_datetime($deadline_str) : undef;
+    ($name, $comment, $deadline);
+}
+
 # 返り値JSON
 my $success = {status => 1};
 my $failure = {status => 0};
@@ -227,6 +239,11 @@ my $update_todo = sub {
     my $comment = $c->req->param('comment');
     my $deadline = $self->convert_datetime($c->req->param('deadline'));
     
+    my $model = $c->req->param('model');
+    if ($model) {
+        ($name, $comment, $deadline) = $self->get_backbone_params($model);
+    }
+
     try {
       $self->model->update($TABLE_NAME, {
         name => $name,
@@ -268,13 +285,9 @@ my $create_todo = sub {
     my $comment = $c->req->param('comment');
     my $deadline = $self->convert_datetime($c->req->param('deadline'));
 
-    # Backboneのサポート
-    my $data = $c->req->param('model');
-    if ($data) {
-        $data = $_JSON->decode($data);
-        $name = $data->{name};
-        $comment = $data->{comment};
-        $deadline = undef;
+    my $model = $c->req->param('model');
+    if ($model) {
+        ($name, $comment, $deadline) = $self->get_backbone_params($model);
     }
     
     try {

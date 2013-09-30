@@ -8,8 +8,42 @@ ul.panel-group {
   padding: 0;
 }
 
+nav.navbar.navbar-default {
+  background-color: #1abc9c;
+  border-width: 0px;
+  @include border-radius(0px);
+  
+  //a.navbar-brand, a#show-done-tasks
+  a {
+    color: rgba(255, 255, 255, 0.9);
+    
+    &:hover {
+      color: #16a085;
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+  
+  a#create-new-task {
+    padding: 8px 15px;
+    margin: 6px 0 5px;
+    
+    background-color: #16a085;
+  }
+  
+}
+
 #content {
   margin-bottom: 20px;
+  
+  #todo-accordion {
+    .panel {
+      @include border-radius(0px);
+      margin: 0;
+    }
+    .panel-heading {
+      background-color: #DFE;
+    }
+  }
 }
 
 #todo-form {
