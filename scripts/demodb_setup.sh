@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#kossyデータベースがないと動かない
+
 user="root"
 password="root"
 
