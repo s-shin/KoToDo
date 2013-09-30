@@ -67,6 +67,8 @@ filter 'flash' => sub {
     }
 };
 
+my $TABLE_NAME = 'todos';
+
 #----------------------------------------
 # URL: /
 #----------------------------------------
@@ -83,14 +85,14 @@ get '/' => [qw/flash/] => sub {
 # 一覧ページ
 get '/todos/' => [qw/flash/] => sub {
     my ($self, $c) = @_;
-    my $todo_itr = $self->model->search('todos', {});
+    my $todo_itr = $self->model->search($TABLE_NAME, {});
     $c->render('todos/index.tx', {todo_itr => $todo_itr});
 };
 
 # 個別ページ
 get '/todos/:id' => [qw/flash/] => sub {
     my ($self, $c) = @_;
-    my $todo = $self->model->single('todos', {id => $c->args->{id}});
+    my $todo = $self->model->single($TABLE_NAME, {id => $c->args->{id}});
     $c->render('todos/show.tx', {todo => $todo});
 };
 
@@ -98,7 +100,7 @@ get '/todos/:id' => [qw/flash/] => sub {
 get '/todos/:id/edit' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
-    my $todo = $self->model->single('todos', {id => $c->args->{id}});
+    my $todo = $self->model->single($TABLE_NAME, {id => $c->args->{id}});
     $c->render('todos/edit.tx', {todo => $todo});
 };
 
@@ -109,7 +111,7 @@ post '/todos/:id/update' => [qw/flash/] => sub {
     my $name = $c->req->param('name');
     my $comment = $c->req->param('comment');
     
-    $self->model->update('todos', {
+    $self->model->update($TABLE_NAME, {
       name => $name,
       comment => $comment, 
     }, {
@@ -122,7 +124,7 @@ post '/todos/:id/update' => [qw/flash/] => sub {
 get '/todos/:id/delete' => [qw/flash/] => sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
-    $self->model->delete('todos', {id => $id});
+    $self->model->delete($TABLE_NAME, {id => $id});
     # TODO: 削除処理
     $c->redirect('/todos/');
 };
@@ -133,7 +135,7 @@ post '/todos/' => [qw/flash/] => sub {
     my $name = $c->req->param('name');
     
     # TODO: 保存成功か確認
-    $self->model->insert('todos', {
+    $self->model->insert($TABLE_NAME, {
         name => $name,
         created_at => DateTime->now(time_zone => 'local'),
     });
@@ -155,10 +157,12 @@ my $API = "api";
 my $success = {status => 1};
 my $failure = {status => 0};
 
+my $DISTANCE_FUTURE = "9999-12-31";
+
 # 一覧ページ
 my $get_todos = sub {
     my ($self, $c) = @_;
-    
+
     # q: 検索キーワード
     # p: ページ番号 1~
     # from: deadlineでの開始日付
@@ -171,8 +175,8 @@ my $get_todos = sub {
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
       $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline LIMIT :offset, :limit}, 
-        {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit}
+        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(REPLACE(deadline, NULL, :future)) BETWEEN :from AND :to ORDER BY deadline LIMIT :offset, :limit}, 
+        {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       ) : $self->model->search_named(
         q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline LIMIT :offset, :limit}, 
         {query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit}
@@ -195,7 +199,7 @@ get "/$API/todos.json" => $get_todos;
 my $get_todo = sub {
   my ($self, $c) = @_;
   try {
-    my $todo = $self->model->single('todos', {id => $c->args->{id}});
+    my $todo = $self->model->single($TABLE_NAME, {id => $c->args->{id}});
 
     $c->render_json(+{ 
       todo => +{
@@ -221,11 +225,10 @@ my $update_todo = sub {
     my $id = $c->args->{id};
     my $name = $c->req->param('name');
     my $comment = $c->req->param('comment');
-    my $deadline_str = $c->req->param('deadline');
-
-    my $deadline = $self->convert_datetime($deadline_str);
+    my $deadline = $self->convert_datetime($c->req->param('deadline'));
+    
     try {
-      $self->model->update('todos', {
+      $self->model->update($TABLE_NAME, {
         name => $name,
         comment => $comment, 
         deadline => $deadline,   
@@ -248,9 +251,7 @@ my $delete_todo = sub {
     my $id = $c->args->{id};
 
     try {
-      my $retval = $self->model->delete('todos', {id => $id});  
-      print Dumper($retval), "\n";
-      print STDOUT "----";
+      my $retval = $self->model->delete($TABLE_NAME, {id => $id});  
       $c->render_json( $success );
     } catch {
       my %response = (%{$failure}, (massages=>["DB delete error."]));
@@ -265,9 +266,7 @@ my $create_todo = sub {
     my ($self, $c) = @_;
     my $name = $c->req->param('name');
     my $comment = $c->req->param('comment');
-    my $deadline_str = $c->req->param('deadline');
-    
-    my $deadline = $self->convert_datetime($deadline_str);
+    my $deadline = $self->convert_datetime($c->req->param('deadline'));
 
     # Backboneのサポート
     my $data = $c->req->param('model');
@@ -279,7 +278,7 @@ my $create_todo = sub {
     }
     
     try {
-      $self->model->insert('todos', {
+      $self->model->insert($TABLE_NAME, {
           name => $name,
           comment => $comment, 
           deadline => $deadline,
