@@ -31,10 +31,17 @@ prefix_full="INSERT INTO todos(name, comment, deadline)"
 
 #Test data for demo
 insert="INSERT INTO todos(name, comment, deadline) \
-VALUES ('あしたっていつのあしたよ？', 'あしたって今さッ！', ADDDATE(NOW(), 1));\
+VALUES ('パーティの返事をする', '鹿鳴館', ADDDATE(NOW(), 1));\
 INSERT INTO todos(name, comment) \
-VALUES ('無期限タスク', 'コメント');
-
+VALUES ('年金の書類を提出する', '両親に確認を取る');\
+INSERT INTO todos(name, comment, deadline) \
+VALUES ('内定式', 'スピーチの練習をしておく', ADDDATE(NOW(), 1));\
+INSERT INTO todos(name, comment, deadline) \
+VALUES ('澄川さんへのメッセージを書く', 'ありがとうございました！', ADDDATE(NOW(), 0));\
+INSERT INTO todos(name, comment, deadline) \
+VALUES ('借りた本を返す', '', ADDDATE(NOW(), -1));\
+INSERT INTO todos(name, comment) \
+VALUES ('Perlマスターになる', 'Rubyiestを駆逐してやる');\
 "
 
 #create db
