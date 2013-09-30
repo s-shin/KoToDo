@@ -175,11 +175,11 @@ my $get_todos = sub {
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
       $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(REPLACE(deadline, NULL, :future)) BETWEEN :from AND :to ORDER BY deadline LIMIT :offset, :limit}, 
+        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(IFNULL(deadline, :future)) BETWEEN :from AND :to ORDER BY ifnull(deadline, :future) LIMIT :offset, :limit}, 
         {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       ) : $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query ORDER BY deadline LIMIT :offset, :limit}, 
-        {query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit}
+        q{SELECT * FROM todos WHERE name LIKE :query ORDER BY ifnull(deadline,  :future) LIMIT :offset, :limit}, 
+        {query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       );
     
     my $rows = $todo_itr->all;
