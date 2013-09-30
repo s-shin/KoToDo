@@ -126,7 +126,8 @@
       return _ref4;
     }
 
-    MainView.prototype.initialize = function() {
+    MainView.prototype.initialize = function(opts) {
+      console.log(opts);
       this.template = _.template("<ul class=\"panel-group\" id=\"todo-accordion\"></ul>");
       this.$el.html(this.template());
       this.elTodoList = this.$el.find("ul");
@@ -171,7 +172,64 @@
     TodoView.prototype.className = "panel panel-default";
 
     TodoView.prototype.initialize = function() {
-      return this.template = _.template("<div class=\"panel-heading\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\"<%= is_done ? \" checked='checked'\" : \"\" %> /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		created at <%= created_at %>\n		<% if (deadline) { %>\n			, deadline is <%= deadline %>\n		<% } %>\n		<a href=\"#\">edit</a>\n		<a href=\"#\">delete</a>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>\n<!--\nID: <%= id %><br />\nName: <%= name %><br />\nComment: <%= comment %><br />\nDeadline: <%= deadline %><br />\nDone: <%= is_done %><br />\nCreated At: <%= created_at %><br />\nUpdated At: <%= updated_at %><br />\n-->");
+      this.todoTemplate = _.template("<div class=\"panel-heading\">\n	<div class=\"checkbox-inline\">\n		<input type=\"checkbox\"<%= is_done ? \" checked='checked'\" : \"\" %> /> \n		<a class=\"accordion-toggle\" data-parent=\"#todo-accordion\" data-toggle=\"collapse\" href=\"#todo_collapse_<%= id %>\">\n			<%= name %>\n		</a>\n	</div>\n	<span class=\"pull-right\">\n		<% if (deadline) { %>\n			(deadline: <%= deadline %>)\n		<% } else { %>\n			(no deadline)\n		<% } %>\n		<a class=\"btn btn-xs btn-default edit\" href=\"javascript: void 0;\">edit</a>\n		<a class=\"btn btn-xs btn-default delete\" href=\"javascript: void 0;\">delete</a>\n	</span>\n</div>\n<div id=\"todo_collapse_<%= id %>\" class=\"panel-collapse collapse\">\n	<div class=\"panel-body\">\n		<% if (comment) { %>\n			<%= comment %>\n		<% } else { %>\n			no comment\n		<% } %>\n	</div>\n</div>");
+      this.formTemplate = _.template("<form>\n	<div class=\"panel-heading\">\n		<div class=\"checkbox-inline\">\n			<input type=\"text\" name=\"name\" class=\"form-control\" value=\"<%= name %>\" />\n		</div>\n		<span class=\"pull-right\">\n			<input type=\"datetime\" class=\"form-control\" name=\"deadline\" value=\"<%= deadline %>\" placeholder=\"deadline\" />\n		</span>\n	</div>\n	<div class=\"panel-body\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<label>Comment:</label>\n				<textarea name=\"comment\" class=\"form-control\"><%= comment %></textarea>\n			</div>\n			<button type=\"submit\" class=\"btn btn-primary\">Update</button>\n			<button type=\"button\" class=\"btn btn-default cancel\">Cancel</button>\n		</div>\n	</div>\n</form>");
+      return this.template = this.todoTemplate;
+    };
+
+    TodoView.prototype.events = {
+      "click a.edit": "editTodo",
+      "click a.delete": "deleteTodo",
+      "click input[type=checkbox]": "toggleDone",
+      "submit form": "updateTodo",
+      "click .cancel": "cancelSubmit"
+    };
+
+    TodoView.prototype.toggleDone = function() {
+      console.log("TODO: ");
+      return this.$el.slideUp(500);
+    };
+
+    TodoView.prototype.editTodo = function(e) {
+      this.template = this.formTemplate;
+      return this.render();
+    };
+
+    TodoView.prototype.deleteTodo = function(e) {
+      var _this = this;
+      if (!confirm("Are you sure you want to delete this task?")) {
+        return false;
+      }
+      console.log(arguments, this.model);
+      this.model.destroy({
+        success: function(model, response) {
+          _this.$el.slideUp(500);
+          return console.log("delete successfully.");
+        }
+      });
+      return false;
+    };
+
+    TodoView.prototype.cancelSubmit = function() {
+      this.template = this.todoTemplate;
+      return this.render();
+    };
+
+    TodoView.prototype.updateTodo = function(e) {
+      var _this = this;
+      this.model.save({
+        name: this.$el.find("input[name=name]").val(),
+        deadline: this.$el.find("input[name=deadline]").val(),
+        comment: this.$el.find("textarea[name=comment]").val()
+      }, {
+        success: function(model, response) {
+          return _this.cancelSubmit();
+        },
+        error: function(model, response) {
+          return console.error(response);
+        }
+      });
+      return false;
     };
 
     TodoView.prototype.render = function() {
@@ -192,7 +250,7 @@
     }
 
     TodoForm.prototype.initialize = function() {
-      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\">Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<input type=\"text\" class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<button type=\"submit\" class=\"btn btn-default btn-primary btn-block\">Submit</button>\n</form>");
+      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\">Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<textarea class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" name=\"deadline\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<button type=\"submit\" class=\"btn btn-default btn-primary btn-block\">Submit</button>\n</form>");
       return this.model != null ? this.model : this.model = new Todo();
     };
 
@@ -201,16 +259,20 @@
     };
 
     TodoForm.prototype.submitNewTodo = function(data) {
-      var todo;
+      var _this = this;
       data = {};
       this.$el.find("input[type=text]").each(function() {
         var t;
         t = $(this);
         return data[t.attr("name")] = t.val();
       });
-      todo = new Todo(data);
-      todo.save(null, {
+      new Todo().save({
+        name: this.$el.find("input[name=name]").val(),
+        comment: this.$el.find("textarea[name=comment]").val(),
+        deadline: this.$el.find("input[name=deadline]").val()
+      }, {
         success: function(model, response, options) {
+          _this.$el.hide();
           return router.navigate("/", {
             trigger: true
           });
@@ -240,11 +302,18 @@
     }
 
     Router.prototype.routes = {
-      "": "main"
+      "": "main",
+      "done": "done"
     };
 
     Router.prototype.main = function() {
       return $("#content").html((new MainView).render().el);
+    };
+
+    Router.prototype.done = function() {
+      return $("#content").html((new MainView({
+        is_done: true
+      })).render().el);
     };
 
     return Router;

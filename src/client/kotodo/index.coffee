@@ -4,9 +4,13 @@ class Router extends Backbone.Router
 	
 	routes:
 		"": "main"
+		"done": "done"
 		
 	main: ->
 		$("#content").html (new MainView).render().el
+	
+	done: ->
+		$("#content").html (new MainView({is_done: true})).render().el
 
 
 app = new App
