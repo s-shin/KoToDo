@@ -8,7 +8,8 @@ use KoToDo::Model;
 use DateTime;
 use Data::Dumper;
 use DateTime::Format::Strptime;
-use JSON;
+use Encode qw(encode decode encode_utf8);
+#use JSON;
 use Try::Tiny;
 my $_JSON = JSON->new()->allow_blessed(1)->convert_blessed(1)->ascii(1);
 
@@ -183,18 +184,33 @@ my $get_todos = sub {
     my $p = $c->req->param("p") || 1;
     my $from  = $c->req->param("from");
     my $to    = $c->req->param("to");
-   
+    my $is_done = $c->req->param("is_done");
+
+#    print STDOUT "--- $is_done ---\n";
+
+    unless($is_done) {
+      $is_done = -1;
+    }
+
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
       $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query AND DATE(IFNULL(deadline, :future)) BETWEEN :from AND :to ORDER BY ifnull(deadline, :future) LIMIT :offset, :limit}, 
-        {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
+        q{SELECT * FROM todos WHERE is_done >= :done AND name LIKE :query AND DATE(IFNULL(deadline, :future)) BETWEEN :from AND :to ORDER BY ifnull(deadline, :future) LIMIT :offset, :limit}, 
+        {done=>$is_done, query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       ) : $self->model->search_named(
-        q{SELECT * FROM todos WHERE name LIKE :query ORDER BY ifnull(deadline,  :future) LIMIT :offset, :limit}, 
-        {query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
+        q{SELECT * FROM todos WHERE is_done >= :done AND name LIKE :query ORDER BY ifnull(deadline,  :future) LIMIT :offset, :limit}, 
+        {done=>$is_done, query => "%".$q."%", limit => $limit, offset=> ($p-1)*$limit, future=>$DISTANCE_FUTURE}
       );
     
     my $rows = $todo_itr->all;
+
+#    検証用
+#    my @data = ();
+#    foreach my $row (@{$rows}){
+#      push @data, 
+#    }
+
+
     my @data = map {
       id   => $_->id+0,     name => $_->name, 
       is_done => $_->is_done+0, deadline => $_->deadline, 
@@ -202,6 +218,7 @@ my $get_todos = sub {
       updated_at => $_->updated_at, 
       created_at => $_->created_at 
     } , @{$rows};
+
     $c->render_json(+{todos=>\@data});
 };
 get "/$API/todos/" => $get_todos;
@@ -238,7 +255,8 @@ my $update_todo = sub {
     my $name = $c->req->param('name');
     my $comment = $c->req->param('comment');
     my $deadline = $self->convert_datetime($c->req->param('deadline'));
-    
+    my $is_done = $c->req->param('is_done');
+
     my $model = $c->req->param('model');
     if ($model) {
         ($name, $comment, $deadline) = $self->get_backbone_params($model);
@@ -246,9 +264,10 @@ my $update_todo = sub {
 
     try {
       $self->model->update($TABLE_NAME, {
-        name => $name,
-        comment => $comment, 
-        deadline => $deadline,   
+        name      => $name,
+        comment   => $comment, 
+        deadline  => $deadline,
+        is_done   => $is_done   
       }, {
         id => $id,
       });
