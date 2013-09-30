@@ -249,12 +249,17 @@
     }
 
     TodoForm.prototype.initialize = function() {
-      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"New ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\"><span class=\"glyphicon glyphicon-arrow-down\"></span> Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<textarea class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" name=\"deadline\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<div style=\"overflow: hidden;\">\n		<button type=\"submit\" class=\"btn btn-default btn-primary pull-right\">Submit</button>\n	</div>\n</form>");
+      this.template = _.template("<form method=\"post\" action=\"/api/todos/\" role=\"form\">\n	<div class=\"form-todo\">\n		<input type=\"text\" class=\"form-control\" name=\"name\" placeholder=\"New ToDo\" value=\"<%= name %>\" />\n	</div>\n	<div class=\"panel-group\">\n		<div class=\"panel panel-default\">\n			<a class=\"accordion-toggle\" data-toggle=\"collapse\" href=\"#collapse-form\">\n				<div class=\"panel-heading\">\n					<h4 class=\"panel-title\"><span class=\"glyphicon glyphicon-arrow-down\"></span> Detail</h4>\n				</div>\n			</a>\n		</div>\n	</div>\n	<div id=\"collapse-form\" class=\"panel-collapse collapse\">\n		<div class=\"panel-body\">\n			<div class=\"form-group\">\n				<lable for=\"comment\">Comment</label>\n				<textarea class=\"form-control\" name=\"comment\" placeholder=\"Comment\" />\n			</div>\n			<div class=\"form-group\">\n				<label for=\"form-deadline\">Deadline</label>\n				<input type=\"datetime\" name=\"deadline\" class=\"form-control\" id=\"form-deadline\" />\n			</div>\n		</div>\n	</div>\n	<button type=\"submit\" class=\"btn btn-default btn-primary\">Submit</button>\n	<button type=\"button\" class=\"btn btn-default cancel\">Cancel</button>\n</form>");
       return this.model != null ? this.model : this.model = new Todo();
     };
 
     TodoForm.prototype.events = {
-      "submit form": "submitNewTodo"
+      "submit form": "submitNewTodo",
+      "click .cancel": "cancel"
+    };
+
+    TodoForm.prototype.cancel = function() {
+      return this.$el.hide();
     };
 
     TodoForm.prototype.submitNewTodo = function(data) {

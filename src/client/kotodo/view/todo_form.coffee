@@ -27,15 +27,18 @@ class TodoForm extends Backbone.View
 					</div>
 				</div>
 			</div>
-			<div style="overflow: hidden;">
-				<button type="submit" class="btn btn-default btn-primary pull-right">Submit</button>
-			</div>
+			<button type="submit" class="btn btn-default btn-primary">Submit</button>
+			<button type="button" class="btn btn-default cancel">Cancel</button>
 		</form>
 		"""
 		@model ?= new Todo()
 	
 	events:
 		"submit form": "submitNewTodo"
+		"click .cancel": "cancel"
+	
+	cancel: ->
+		@$el.hide()
 	
 	submitNewTodo: (data) ->
 		data = {}
