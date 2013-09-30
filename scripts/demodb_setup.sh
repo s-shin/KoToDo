@@ -1,20 +1,18 @@
 #!/bin/bash
 
-#kossyデータベースがないと動かない
-
 #mysqlのroot権限
 user="root"
 password="root"
 
 #kotodoのアカウント
-kotodo_user="kotodo@localhost"
+kotodo_user="kotodo"
 kotodo_pass="kotodo"
 
 dbname="kotodo"
 
 
 db="CREATE DATABASE kotodo;\
-GRANT ALL ON kotodo.* TO "$kotodo_user" IDENTIFIED BY '"$kotodo_pass"';"
+GRANT ALL ON kotodo.* TO "$kotodo_user"@localhost IDENTIFIED BY '"$kotodo_pass"';"
 
 
 create=" CREATE TABLE todos (\
@@ -28,6 +26,9 @@ created_at TIMESTAMP NOT NULL\
 );\
 "
 
+prefix="INSERT INTO todos(name, comment)"
+prefix_full="INSERT INTO todos(name, comment, deadline)"
+
 #Test data for demo
 insert="INSERT INTO todos(name, comment, deadline) \
 VALUES ('あしたっていつのあしたよ？', 'あしたって今さッ！', ADDDATE(NOW(), 1));\
@@ -37,11 +38,11 @@ VALUES ('無期限タスク', 'コメント');
 "
 
 #create db
-echo $db|mysql --user=$user --password=$password $dbname
+echo $db|mysql --user=$user --password=$password
 #create table
-echo $create|mysql --user=$kotodo_user --password=$kotodo_password $dbname
+echo $create|mysql --user=$kotodo_user --password=$kotodo_pass $dbname
 #insert data
-echo $insert|mysql --user=$kotodo_user --password=$kotodo_password $dbname
+echo $insert|mysql --user=$kotodo_user --password=$kotodo_pass $dbname
 
 
 
