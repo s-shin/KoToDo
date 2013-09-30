@@ -113,6 +113,10 @@ post '/todos/' => [qw/flash/] => sub {
 
 my $API = "api";
 
+# 返り値JSON
+my $success = {status => 1};
+my $failure = {status => 0};
+
 # 一覧ページ
 my $get_todos = sub {
     my ($self, $c) = @_;
@@ -126,24 +130,25 @@ my $get_todos = sub {
     my $from = $c->req->param("from");
     my $to = $c->req->param("to");
 
+    unless ($to) {
+      $to = "9999-12-31";
+      # デフォルト値（こんなに大きくなくてもいい？）
+    }
+
     # TODO パラメータのvalidator
 
-    my $limit = 10; # ページの上限
-    
-    my $todo_itr;
-    if ($from or $to) {
-        $todo_itr = $self->model->search_named(
-            q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
-            {query => "%".$q."%", from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
-        );
-    } else {
-        $todo_itr = $self->model->search_named(
-            q{SELECT * FROM todos WHERE name LIKE :query LIMIT :offset, :limit}, 
-            {query => "%".$q."%", limit => $limit, offset=> $p*$limit}
-        );
-    }
-    
-    
+    my $limit = 10; # 1ページの表示上限
+
+    my $todo_itr = $self->model->search_named(
+      q{SELECT * FROM todos WHERE name LIKE :query AND DATE(deadline) BETWEEN :from AND :to ORDER BY deadline DESC LIMIT :offset, :limit}, 
+      {query => "%".$q."%",  from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
+    );
+# LIKEをorで連ねると上手くいかない... 
+#    my $todo_itr = $self->model->search_named(
+#      q{SELECT * FROM todos WHERE name LIKE :query1 or comment LIKE :query2 AND DATE(deadline) BETWEEN :from AND :to LIMIT :offset, :limit}, 
+#      {query1 => $pattern, query2=>$pattern,  from=>$from, to=>$to, limit => $limit, offset=> $p*$limit}
+#    );
+
     my $rows = $todo_itr->all;
     my @data = map {
       id   => $_->id+0,     name => $_->name, 
@@ -180,8 +185,20 @@ my $update_todo = sub {
     my ($self, $c) = @_;
     my $id = $c->args->{id};
     my $name = $c->req->param('name');
+    my $comment = $c->req->param('comment');
+    my $deadline_str = $c->req->param('deadline');
+
+    my $strp = DateTime::Format::Strptime->new(
+      pattern   => '%Y-%m-%d',  
+      time_zone => 'Asia/Tokyo', 
+    );
+  
+    my $deadline = $strp->parse_datetime($deadline_str);
+
     $self->model->update('todos', {
       name => $name,
+      comment => $comment, 
+      deadline => $deadline,   
     }, {
       id => $id,
     });
