@@ -186,9 +186,8 @@ my $get_todos = sub {
     my $to    = $c->req->param("to");
     my $is_done = $c->req->param("is_done");
 
-#    print STDOUT "--- $is_done ---\n";
-
-    unless($is_done) {
+    # is_doneがnullの時は両方でてくる
+    unless(defined($is_done)) {
       $is_done = -1;
     }
 
@@ -203,13 +202,6 @@ my $get_todos = sub {
       );
     
     my $rows = $todo_itr->all;
-
-#    検証用
-#    my @data = ();
-#    foreach my $row (@{$rows}){
-#      push @data, 
-#    }
-
 
     my @data = map {
       id   => $_->id+0,     name => $_->name, 
