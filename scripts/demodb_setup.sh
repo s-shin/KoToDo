@@ -2,10 +2,19 @@
 
 #kossyデータベースがないと動かない
 
+#mysqlのroot権限
 user="root"
 password="root"
 
+#kotodoのアカウント
+kotodo_user="kotodo@localhost"
+kotodo_pass="kotodo"
+
 dbname="kotodo"
+
+
+db="CREATE DATABASE kotodo;\
+GRANT ALL ON kotodo.* TO "$kotodo_user" IDENTIFIED BY '"$kotodo_pass"';"
 
 
 create=" CREATE TABLE todos (\
@@ -27,10 +36,12 @@ VALUES ('無期限タスク', 'コメント');
 
 "
 
+#create db
+echo $db|mysql --user=$user --password=$password $dbname
 #create table
-echo $create|mysql --user=$user --password=$password $dbname
+echo $create|mysql --user=$kotodo_user --password=$kotodo_password $dbname
 #insert data
-echo $insert|mysql --user=$user --password=$password $dbname
+echo $insert|mysql --user=$kotodo_user --password=$kotodo_password $dbname
 
 
 
