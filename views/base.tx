@@ -16,7 +16,9 @@
 	        <a class="navbar-brand" href="<: $c.req.uri_for('/') :>">KoToDo</a>
 				</div>
 				<ul class="nav navbar-nav navbar-right">
+					<!--
 					<li><a id="show-done-tasks" href="/app/done">Done tasks</a></li>
+					-->
 					<li><a id="create-new-task" href="javascript: void 0;" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Create new task</a></li>
 				</ul>
       </div>

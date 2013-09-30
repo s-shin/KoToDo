@@ -4,8 +4,8 @@ class TodoView extends Backbone.View
 	className: "panel panel-default"
 	initialize: ->
 		@todoTemplate = _.template """
-		<div class="panel-heading <%
-				if (deadline && new Date(deadline) < new Date()) { %>overdue<% } %>">
+		<% overdue = deadline && new Date(deadline) < new Date() %>
+		<div class="panel-heading <%= overdue ? 'overdue' : '' %>">
 			<div class="checkbox-inline">
 				<input type="checkbox"<%= is_done ? " checked='checked'" : "" %> /> 
 				<a class="accordion-toggle" data-parent="#todo-accordion" data-toggle="collapse" href="#todo_collapse_<%= id %>">
@@ -13,13 +13,15 @@ class TodoView extends Backbone.View
 				</a>
 			</div>
 			<span class="pull-right">
-				<% if (deadline) { %>
-					(Deadline: <%= new Date(deadline).toLocaleDateString() %>)
-				<% } else { %>
-					(no deadline)
-				<% } %>
-				<a class="btn btn-xs btn-default edit" href="javascript: void 0;">edit</a>
-				<a class="btn btn-xs btn-default delete" href="javascript: void 0;">delete</a>
+				<span class="label label-<%= overdue ? 'danger' : 'warning' %>" style="margin: 0 5px;">
+					<% if (deadline) { %>
+						Deadline: <%= new Date(deadline).toLocaleDateString() %>
+					<% } else { %>
+						no deadline
+					<% } %>
+				</span>
+				<a class="btn btn-xs btn-default edit" href="javascript: void 0;"><span class="glyphicon glyphicon-edit"></span> edit</a>
+				<a class="btn btn-xs btn-default delete" href="javascript: void 0;"><span class="glyphicon glyphicon-remove"></span> delete</a>
 			</span>
 		</div>
 		<div id="todo_collapse_<%= id %>" class="panel-collapse collapse">
