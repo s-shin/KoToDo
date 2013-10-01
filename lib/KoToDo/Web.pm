@@ -6,10 +6,7 @@ use utf8;
 use Kossy;
 use KoToDo::Model;
 use DateTime;
-use Data::Dumper;
 use DateTime::Format::Strptime;
-use Encode qw(encode decode encode_utf8);
-#use JSON;
 use Try::Tiny;
 my $_JSON = JSON->new()->allow_blessed(1)->convert_blessed(1)->ascii(1);
 
@@ -193,12 +190,7 @@ my $get_todos = sub {
     my $p = $c->req->param("p") || 1;
     my $from  = $c->req->param("from");
     my $to    = $c->req->param("to");
-    my $is_done = $c->req->param("is_done");
-
-    # is_doneがnullの時は両方でてくる
-    unless(defined($is_done)) {
-      $is_done = 0;
-    }
+    my $is_done = $c->req->param("is_done") || 0;
 
     my $limit = 10; # 1ページの表示上限
     my $todo_itr = ($from and $to) ?
@@ -288,10 +280,10 @@ my $delete_todo = sub {
     my $id = $c->args->{id};
 
     try {
-      my $retval = $self->model->delete($TABLE_NAME, {id => $id});  
+      $self->model->delete($TABLE_NAME, {id => $id});  
       $c->render_json( $success );
     } catch {
-      my %response = (%{$failure}, (massages=>["DB delete error."]));
+      my %response = (%{$failure}, (massages => ["DB delete error."]));
       $c->render_json(\%response);
     }
 };
